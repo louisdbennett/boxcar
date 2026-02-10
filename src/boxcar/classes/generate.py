@@ -3,8 +3,8 @@ import random
 class Distributions:
     def __init__(self, simulation):
         self.simulation = simulation
-    
-    def generate_taxi_arrival(self, rate=2)->float:
+        
+    def generate_taxi_arrival(self, rate=3)->float:
         arrival_time = random.expovariate(rate)  
         return arrival_time
 
