@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "boxcar"
+version = "0.1.0"
+description = "Model & Simulate BoxCar app"
+authors = ["Louis Bennett"]
+license = "None"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
