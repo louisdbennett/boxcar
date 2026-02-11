@@ -25,8 +25,8 @@ class Simulation:
 
         if distributions:
             print('adding distributions')
+            self.register_distribution("location", distributions.generate_location)
             self.register_distribution("taxi-arrival", distributions.generate_taxi_arrival)
-            self.register_distribution("taxi-location", distributions.generate_taxi_location)
             self.register_distribution("taxi-departure", distributions.generate_taxi_departure)
 
         if handlers:
