@@ -13,6 +13,6 @@ class Distributions:
         return departure_time
 
     def generate_taxi_location(self)->float:
-        x = random.uniform(0, self.boundary_length)
-        y = random.uniform(0, self.boundary_length)
+        x = random.uniform(0, self.simulation.boundary_length)
+        y = random.uniform(0, self.simulation.boundary_length)
         return (x,y)
