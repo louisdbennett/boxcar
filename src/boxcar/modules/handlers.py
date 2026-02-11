@@ -6,10 +6,10 @@ def execute_taxi_arrival(sim:Simulation):
     sim.number_total_taxis += 1
 
     # generate the starting location of the taxi and get its id
-    location = sim.distributions["taxi-location"]()
+    location = sim.distributions["location"]()
     taxi_number = sim.number_total_taxis
 
-    print(f'taxi {taxi_number} arrives')
+    print(f'taxi {taxi_number} arrives at {location}')
 
     sim.taxis[taxi_number] = Taxi(taxi_number, location)
 
@@ -28,9 +28,15 @@ def execute_taxi_arrival(sim:Simulation):
     sim.add_event(arrival_time, "taxi-arrival")
 
 def execute_taxi_departure(sim:Simulation, taxi_number):
-    # check if the driver is currently active and in which case ?
     print(f'taxi {taxi_number} departs')
-    sim.taxis.pop(taxi_number)
+    taxi = sim.taxis.get(taxi_number)
+
+    # if the taxi is currently idle then remove it
+    # otherwise schedule if going offline, and then check this at the end of a drop off event
+    if taxi.idle:
+        sim.taxis.pop(taxi_number)
+    else:
+        taxi.go_offline()
 
 def execute_termination(sim:Simulation):
     print('simulation terminates')
