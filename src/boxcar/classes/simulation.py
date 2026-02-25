@@ -1,6 +1,7 @@
 from typing import Callable, Any, List, Dict
 from bisect import bisect_right
 from boxcar.classes.taxi import Taxi
+from boxcar.classes.rider import Rider
 
 class Simulation:
     def __init__(
@@ -21,6 +22,7 @@ class Simulation:
         self.number_total_taxis: int = 0
         self.number_riders: int = 0
         self.taxis: Dict[int, Taxi] = {}
+        self.riders: Dict[int, Rider] = {}
         self.current_time: float = 0
 
         if distributions:
@@ -28,15 +30,24 @@ class Simulation:
             self.register_distribution("location", distributions.generate_location)
             self.register_distribution("taxi-arrival", distributions.generate_taxi_arrival)
             self.register_distribution("taxi-departure", distributions.generate_taxi_departure)
+            self.register_distribution("rider-arrival", distributions.generate_rider_arrival)
+            self.register_distribution("rider-cancellation", distributions.generate_rider_cancelling)
+            self.register_distribution("journey", distributions.generate_journey)
 
         if handlers:
             print('adding handlers')
             self.register_event_handler("taxi-arrival", handlers.handle_taxi_arrival)
             self.register_event_handler("taxi-departure", handlers.handle_taxi_departure)
             self.register_event_handler("termination", handlers.handle_termination)
+            self.register_event_handler("rider-arrival", handlers.handle_rider_arrival)
+            self.register_event_handler("rider-cancellation", handlers.handle_rider_cancellation)
+            self.register_event_handler("pickup", handlers.handle_rider_pickup)
 
-        first_arrival = self.current_time + self.distributions["taxi-arrival"]()
-        self.add_event(first_arrival, "taxi-arrival", None)
+        first_taxi_arrival = self.current_time + self.distributions["taxi-arrival"]()
+        first_rider_arrival = self.current_time + self.distributions["rider-arrival"]()
+
+        self.add_event(first_taxi_arrival, "taxi-arrival", None)
+        self.add_event(first_rider_arrival, "rider-arrival", None)
         self.add_event(self.simulation_length, "termination", None)
 
     def add_event(
@@ -58,15 +69,14 @@ class Simulation:
         self.event_handlers[event_type] = handler
 
     def progress_time(self) -> None:
-        print("progressing time")
         if not self.event_calendar:
             print("No more events to process.")
             return
 
         next_event = self.event_calendar.pop(0)
-        self.current_time = next_event['time']
-        event_type = next_event['type']
-        event_data = next_event['data']
+        self.current_time = next_event["time"]
+        event_type = next_event["type"]
+        event_data = next_event["data"]
 
         # perform any necessary tracking of variables here
 
@@ -90,3 +100,6 @@ class Simulation:
         if terminate_simulation == 0:
             raise Exception('No events left to process')
 
+    # some helper functions
+    def get_idle_taxis(self) -> Dict[int, Taxi]:
+        return {num: taxi for num, taxi in self.taxis.items() if taxi.idle}

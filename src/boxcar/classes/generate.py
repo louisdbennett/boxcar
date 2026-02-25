@@ -22,3 +22,12 @@ class Distributions:
     def generate_rider_arrival(self, rate=30) -> float:
         arrival_time = random.expovariate(rate)  
         return arrival_time
+
+    def generate_rider_cancelling(self, rate=5) -> float:
+        cancellation_time = random.expovariate(rate)
+        return cancellation_time
+
+    def generate_journey(self, dist) -> float:
+        trip_time = dist / 20
+        journey_length = random.uniform(0.8 * trip_time, 1.2 * trip_time)
+        return journey_length
