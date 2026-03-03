@@ -1,13 +1,15 @@
 from typing import Tuple
 
 class Rider:
-    def __init__(self, number: int, location: Tuple, destination: Tuple):
+    def __init__(self, number: int, location: Tuple, destination: Tuple, time: float):
         self.number = number
         self.location = location
         self.destination = destination
         self.cancelled = False
         self.in_service = False
         self.at_destination = False
+        self.online_time = time
+        self.pickup_time = False
 
     def update_location(self, location):
         self.location = location
