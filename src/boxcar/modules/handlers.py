@@ -14,7 +14,8 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
         print(f"rider {rider_number} is the closest and taxi {taxi_number} is assigned to pick them up")
 
         # update the rider to be in service so they don't go offline
-        riders[rider_number].update_service_status(service_status=True)
+        rider = riders[rider_number]
+        rider.update_service_status(service_status=True)
 
         # track the total distance the taxi has/will cover
         taxi.distance_covered += dist
@@ -30,6 +31,9 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
             event_data={"rider_number": rider_number, "taxi_number": taxi_number}
         )
 
+        # also add the pickup time to the rider
+        rider.pickup_time = journey_time
+
 def execute_taxi_arrival(sim: Simulation):
     # get the taxi id we'll use to track it through the system
     sim.number_taxis += 1
@@ -43,9 +47,6 @@ def execute_taxi_arrival(sim: Simulation):
     # add the taxi to the simulation
     sim.taxis[taxi_number] = Taxi(taxi_number, location)
 
-    # use helper function to schedule pickup of the closest rider
-    schedule_taxi_pickup(sim, sim.taxis[taxi_number])
-
     departure_time = sim.current_time + sim.distributions["taxi-departure"]()
     # pass taxi number through to departure event so we can remove the correct taxi
     sim.add_event(
@@ -54,7 +55,6 @@ def execute_taxi_arrival(sim: Simulation):
 
     arrival_time = sim.current_time + sim.distributions["taxi-arrival"]()
     sim.add_event(arrival_time, "taxi-arrival")
-
 
 def execute_taxi_departure(sim: Simulation, taxi_number):
     print(f"taxi {taxi_number} departs")
@@ -66,7 +66,6 @@ def execute_taxi_departure(sim: Simulation, taxi_number):
         sim.taxis.pop(taxi_number)
     else:
         taxi.go_offline()
-
 
 def execute_rider_arrival(sim: Simulation):
     # get the rider id we'll use to track it through the system
@@ -80,7 +79,7 @@ def execute_rider_arrival(sim: Simulation):
 
     print(f"rider {rider_number} arrives at {location}")
 
-    sim.riders[rider_number] = Rider(rider_number, location, destination)
+    sim.riders[rider_number] = Rider(rider_number, location, destination, sim.current_time)
 
     cancellation_time = sim.current_time + sim.distributions["rider-cancellation"]()
     # pass rider number through to cancellation event
@@ -98,10 +97,11 @@ def execute_rider_arrival(sim: Simulation):
     taxis = sim.get_idle_taxis()
     if taxis:
         taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
-        print(f"taxi {taxi_number} is the closest ({dist} away) and is assigned the job")
+        print(f"taxi {taxi_number} is the closest out of {len(taxis)} ({dist} away) and is assigned the job")
 
         # update the rider to be in service so they don't go offline
-        sim.riders[rider_number].update_service_status(service_status=True)
+        rider = sim.riders[rider_number]
+        rider.update_service_status(service_status=True)
 
         # update the taxi to no longer be idle
         taxis[taxi_number].update_idle_status(idle_status=False)
@@ -114,6 +114,8 @@ def execute_rider_arrival(sim: Simulation):
             event_data={"rider_number": rider_number, "taxi_number": taxi_number}
         )
 
+        # also add the pickup time to the rider
+        rider.pickup_time = journey_time
 
 def execute_rider_cancellation(sim: Simulation, rider_number):
     rider = sim.riders.get(rider_number)
@@ -151,22 +153,31 @@ def execute_rider_pickup(sim: Simulation, rider_number, taxi_number):
 def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
     print(f"taxi {taxi_number} dropping off rider {rider_number}")
 
+    taxi = sim.taxis.get(taxi_number)
+
     # update the rider to be at their destination
     rider = sim.riders.get(rider_number)
     rider.reach_destination()
 
-    # schedule a pickup of the closest rider
-    schedule_taxi_pickup(sim, sim.taxis.get(taxi_number))
+    # if a rider is staying online then get them to pick up the closest rider
+    # otherwise get them to log off
+    if taxi.going_offline:
+        sim.taxis.pop(taxi_number)
+    else:
+        schedule_taxi_pickup(sim, sim.taxis.get(taxi_number))
 
 def execute_termination(sim: Simulation):
-    distance = (taxi.distance_covered for taxi in sim.taxis.values())
-    money_made = (taxi.money_made for taxi in sim.taxis.values())
+    # distance = (taxi.distance_covered for taxi in sim.taxis.values())
+    # money_made = (taxi.money_made for taxi in sim.taxis.values())
+    # print(sum(taxi_metrics[0] - 0.2 * taxi_metrics[1] for taxi_metrics in zip(money_made, distance)))
 
-    # cancels = sum(rider.cancelled for rider in sim.riders.values()) / sim.number_riders
+    # online_time = (rider.online_time for rider in sim.riders.values() if rider.pickup_time)
+    # pickup_time = (rider.pickup_time for rider in sim.riders.values() if rider.pickup_time)
 
-    # print(sum(distance) / sim.number_taxis)
-    # print(sum(money_made))
-    # print(cancels)
+    # print(len(list(online_time)))
+    # print(len(list(pickup_time)))
+    # print(sim.number_riders)
 
-    for taxi_metrics in zip(money_made, distance):
-        print(taxi_metrics[0] - 0.2 * taxi_metrics[1])
+    # for online, pickup in zip(online_time, pickup_time):
+    #     print((pickup - online) * 60)
+    print('terminating simulation')
