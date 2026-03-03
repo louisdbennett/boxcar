@@ -104,4 +104,4 @@ class Simulation:
         return {num: taxi for num, taxi in self.taxis.items() if taxi.idle}
 
     def get_waiting_riders(self) -> Dict[int, Rider]:
-        return {num: rider for num, rider in self.riders.items() if (not rider.in_service and not rider.cancelled and not rider.in_service)}
+        return {num: rider for num, rider in self.riders.items() if (not rider.in_service and not rider.cancelled and not rider.at_destination)}
