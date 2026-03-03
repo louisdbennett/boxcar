@@ -26,7 +26,6 @@ class Simulation:
         self.current_time: float = 0
 
         if distributions:
-            print('adding distributions')
             self.register_distribution("location", distributions.generate_location)
             self.register_distribution("taxi-arrival", distributions.generate_taxi_arrival)
             self.register_distribution("taxi-departure", distributions.generate_taxi_departure)
@@ -35,7 +34,6 @@ class Simulation:
             self.register_distribution("journey", distributions.generate_journey)
 
         if handlers:
-            print('adding handlers')
             self.register_event_handler("taxi-arrival", handlers.handle_taxi_arrival)
             self.register_event_handler("taxi-departure", handlers.handle_taxi_departure)
             self.register_event_handler("termination", handlers.handle_termination)
