@@ -3,10 +3,10 @@ import numpy.typing as npt
 from scipy.spatial.distance import cdist
 from typing import Tuple
 
-def get_taxi_locations(taxis) -> npt.ArrayLike:
+def get_locations(objs) -> npt.ArrayLike:
     return np.array([
-        (taxi.location[0], taxi.location[1], num)
-        for num, taxi in taxis.items()
+        (obj.location[0], obj.location[1], num)
+        for num, obj in objs.items()
     ])
 
 def find_closest(

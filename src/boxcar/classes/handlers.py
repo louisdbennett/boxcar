@@ -21,5 +21,8 @@ class Handlers:
     def handle_rider_pickup(self, event_data: Any):
         hf.execute_rider_pickup(self.simulation, event_data["rider_number"], event_data["taxi_number"])
 
+    def handle_rider_dropoff(self, event_data: Any):
+        hf.execute_rider_dropoff(self.simulation, event_data["rider_number"], event_data["taxi_number"])
+
     def handle_termination(self, event_data: Any):
         hf.execute_termination(self.simulation)

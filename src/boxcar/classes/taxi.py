@@ -7,6 +7,8 @@ class Taxi:
         self.location = location
         self.idle = True
         self.going_offline = False
+        self.distance_covered = 0
+        self.money_made = 0
 
     def go_offline(self):
         self.going_offline = True

@@ -3,21 +3,48 @@ from boxcar.classes.simulation import Simulation
 from boxcar.classes.taxi import Taxi
 import boxcar.modules.utils as utils
 
+def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
+    location = taxi.location
+    taxi_number = taxi.number
+
+    # picking up closest idle passengers if any exist
+    riders = sim.get_waiting_riders()
+    if riders:
+        rider_number, dist = utils.find_closest(location, utils.get_locations(riders))
+        print(f"rider {rider_number} is the closest and taxi {taxi_number} is assigned to pick them up")
+
+        # update the rider to be in service so they don't go offline
+        riders[rider_number].update_service_status(service_status=True)
+
+        # track the total distance the taxi has/will cover
+        taxi.distance_covered += dist
+
+        # update the taxi to not be in an idle state
+        taxi.update_idle_status(False)
+
+        # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
+        journey_time = sim.current_time + sim.distributions["journey"](dist)
+        sim.add_event(
+            journey_time,
+            "pickup",
+            event_data={"rider_number": rider_number, "taxi_number": taxi_number}
+        )
 
 def execute_taxi_arrival(sim: Simulation):
     # get the taxi id we'll use to track it through the system
-    sim.number_total_taxis += 1
+    sim.number_taxis += 1
 
     # generate the starting location of the taxi and get its id
     location = sim.distributions["location"]()
-    taxi_number = sim.number_total_taxis
+    taxi_number = sim.number_taxis
 
     print(f"taxi {taxi_number} arrives")
 
+    # add the taxi to the simulation
     sim.taxis[taxi_number] = Taxi(taxi_number, location)
 
-    # todo: add picking up closest idle passengers if any exist
-    # if taxi picks up someone it doesn't go into idle_taxis
+    # use helper function to schedule pickup of the closest rider
+    schedule_taxi_pickup(sim, sim.taxis[taxi_number])
 
     departure_time = sim.current_time + sim.distributions["taxi-departure"]()
     # pass taxi number through to departure event so we can remove the correct taxi
@@ -70,7 +97,7 @@ def execute_rider_arrival(sim: Simulation):
     # check all online taxis and assign the closest
     taxis = sim.get_idle_taxis()
     if taxis:
-        taxi_number, dist = utils.find_closest(location, utils.get_taxi_locations(taxis))
+        taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
         print(f"taxi {taxi_number} is the closest ({dist} away) and is assigned the job")
 
         # update the rider to be in service so they don't go offline
@@ -99,5 +126,47 @@ def execute_rider_cancellation(sim: Simulation, rider_number):
 def execute_rider_pickup(sim: Simulation, rider_number, taxi_number):
     print(f"taxi {taxi_number} picking up rider {rider_number}")
 
+    rider = sim.riders.get(rider_number)
+    taxi = sim.taxis.get(taxi_number)
+
+    dist = ((rider.location[0] - rider.destination[0]) ** 2 + (rider.location[1] - rider.destination[1]) ** 2) ** (1/2)
+
+    # could change these to being after the trip? 
+    # was more convenient here because we have the distance
+    # add the distance of the journey to the taxis total distance
+    taxi.distance_covered += dist
+
+    # add the price of the trip
+    price = 3 + dist * 2
+    taxi.money_made += price
+
+    journey_time = sim.current_time + sim.distributions["journey"](dist)
+
+    sim.add_event(
+        journey_time,
+        "dropoff",
+        event_data={"rider_number": rider_number, "taxi_number": taxi_number},
+    )
+
+def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
+    print(f"taxi {taxi_number} dropping off rider {rider_number}")
+
+    # update the rider to be at their destination
+    rider = sim.riders.get(rider_number)
+    rider.reach_destination()
+
+    # schedule a pickup of the closest rider
+    schedule_taxi_pickup(sim, sim.taxis.get(taxi_number))
+
 def execute_termination(sim: Simulation):
-    print("simulation terminates")
+    distance = (taxi.distance_covered for taxi in sim.taxis.values())
+    money_made = (taxi.money_made for taxi in sim.taxis.values())
+
+    # cancels = sum(rider.cancelled for rider in sim.riders.values()) / sim.number_riders
+
+    # print(sum(distance) / sim.number_taxis)
+    # print(sum(money_made))
+    # print(cancels)
+
+    for taxi_metrics in zip(money_made, distance):
+        print(taxi_metrics[0] - 0.2 * taxi_metrics[1])

@@ -19,7 +19,7 @@ class Simulation:
         self.distributions: Dict[str, Callable[[Any], None]] = {}
         self.event_handlers: Dict[str, Callable[[Any], None]] = {}
         # track the total number of taxis so they each get a unique id
-        self.number_total_taxis: int = 0
+        self.number_taxis: int = 0
         self.number_riders: int = 0
         self.taxis: Dict[int, Taxi] = {}
         self.riders: Dict[int, Rider] = {}
@@ -42,6 +42,7 @@ class Simulation:
             self.register_event_handler("rider-arrival", handlers.handle_rider_arrival)
             self.register_event_handler("rider-cancellation", handlers.handle_rider_cancellation)
             self.register_event_handler("pickup", handlers.handle_rider_pickup)
+            self.register_event_handler("dropoff", handlers.handle_rider_dropoff)
 
         first_taxi_arrival = self.current_time + self.distributions["taxi-arrival"]()
         first_rider_arrival = self.current_time + self.distributions["rider-arrival"]()
@@ -103,3 +104,6 @@ class Simulation:
     # some helper functions
     def get_idle_taxis(self) -> Dict[int, Taxi]:
         return {num: taxi for num, taxi in self.taxis.items() if taxi.idle}
+
+    def get_waiting_riders(self) -> Dict[int, Rider]:
+        return {num: rider for num, rider in self.riders.items() if (not rider.in_service and not rider.cancelled and not rider.in_service)}
