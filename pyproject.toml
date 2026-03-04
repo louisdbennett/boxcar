@@ -7,7 +7,7 @@ license = "None"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.11 || ^3.13"
 numpy = "^2.4.2"
 scipy = "^1.17.1"
 matplotlib = "^3.10.8"
