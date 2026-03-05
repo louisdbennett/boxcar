@@ -158,12 +158,13 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
     # update the rider to be at their destination
     rider = sim.riders.get(rider_number)
     rider.reach_destination()
-
     # if a rider is staying online then get them to pick up the closest rider
     # otherwise get them to log off
     if taxi.going_offline:
         sim.taxis.pop(taxi_number)
     else:
+        taxi.update_idle_status(idle_status=True)
+        taxi.update_location(rider.destination)
         schedule_taxi_pickup(sim, sim.taxis.get(taxi_number))
 
 def execute_termination(sim: Simulation):
