@@ -6,6 +6,7 @@ class Taxi:
         self.number = number
         self.location = location
         self.idle = True
+        self.online = True
         self.going_offline = False
         self.distance_covered = 0
         self.money_made = 0
@@ -18,3 +19,8 @@ class Taxi:
 
     def update_location(self, location):
         self.location = location
+
+    def make_offline(self, location):
+        self.online = False
+
+

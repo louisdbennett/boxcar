@@ -63,7 +63,8 @@ def execute_taxi_departure(sim: Simulation, taxi_number):
     # if the taxi is currently idle then remove it
     # otherwise schedule if going offline, and then check this at the end of a drop off event
     if taxi.idle:
-        sim.taxis.pop(taxi_number)
+        #sim.taxis.pop(taxi_number)
+        taxi.make_offline()
     else:
         taxi.go_offline()
 
@@ -161,7 +162,8 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
     # if a rider is staying online then get them to pick up the closest rider
     # otherwise get them to log off
     if taxi.going_offline:
-        sim.taxis.pop(taxi_number)
+        taxi.make_offline()
+        #sim.taxis.pop(taxi_number)
     else:
         taxi.update_idle_status(idle_status=True)
         taxi.update_location(rider.destination)

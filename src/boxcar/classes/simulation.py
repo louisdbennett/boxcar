@@ -102,7 +102,7 @@ class Simulation:
 
     # some helper functions
     def get_idle_taxis(self) -> Dict[int, Taxi]:
-        return {num: taxi for num, taxi in self.taxis.items() if taxi.idle}
+        return {num: taxi for num, taxi in self.taxis.items() if taxi.idle and taxi.online}
 
     def get_waiting_riders(self) -> Dict[int, Rider]:
         return {num: rider for num, rider in self.riders.items() if (not rider.in_service and not rider.cancelled and not rider.at_destination)}
