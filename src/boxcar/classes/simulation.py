@@ -3,6 +3,7 @@ from bisect import bisect_right
 from boxcar.classes.taxi import Taxi
 from boxcar.classes.rider import Rider
 
+
 class Simulation:
     def __init__(
         self, 
