@@ -13,7 +13,7 @@ def boxcar():
                 cfg = {
                     "rider_choice_rule": rider_choice_rule,
                 }
-
+                print(f"Running config: {cfg}")
                 distributions = Distributions(None)
                 handlers = Handlers(None)
                 
@@ -23,7 +23,7 @@ def boxcar():
                 distributions.simulation = sim
                 handlers.simulation = sim
 
-                print(f"Running config: {cfg}")
+                
                 sim.run()
 
 boxcar()

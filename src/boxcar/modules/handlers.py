@@ -31,7 +31,7 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
             # now assign the closest idle taxi to THAT rider
             chosen_loc = sim.riders[rider_number].location
             dist = np.linalg.norm(np.array(location) - np.array(chosen_loc))
-            print(f"shortest-trip rider {rider_number} chosen; taxi {taxi_number} assigned ({dist} away)")
+            print(f"longest-trip rider {rider_number} chosen; taxi {taxi_number} assigned ({dist} away)")
         # update the rider to be in service so they don't go offline
         rider = riders[rider_number]
         rider.update_service_status(service_status=True)
