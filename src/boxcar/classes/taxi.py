@@ -20,9 +20,5 @@ class Taxi:
     def update_location(self, location):
         self.location = location
 
-<<<<<<< HEAD
-    def make_offline(self):
-=======
     def go_offline(self):
->>>>>>> d3c60b3528346c52489f94c34eb96bfbe8ce4f7c
         self.online = False
