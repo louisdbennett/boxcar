@@ -9,11 +9,13 @@ class Simulation:
         self, 
         distributions: Any = None, 
         handlers: Any = None, 
-        simulation_length: int = 24
+        simulation_length: int = 24,
+        verbose: bool= True
     ):
         # fixed values
         self.boundary_length = 20
         self.simulation_length = simulation_length
+        self.verbose = verbose
 
         # type things that can change to throw errors
         self.event_calendar: List[Dict[str, Any]] = []
