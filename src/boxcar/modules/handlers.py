@@ -4,18 +4,17 @@ from boxcar.classes.taxi import Taxi
 import boxcar.modules.utils as utils
 import numpy as np
 
-def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
+def find_rider(sim: Simulation, taxi:Taxi):
     location = taxi.location
     taxi_number = taxi.number
 
     # picking up closest idle passengers if any exist
     riders = sim.get_waiting_riders()
     trips = utils.get_trips(riders)
+    
     if riders:
         if sim.config["rider_choice_rule"] == "closest":
             rider_number, dist = utils.find_closest(location, utils.get_locations(riders))
-            if sim.verbose:
-                print(f"{round(sim.current_time, 2)}: rider {rider_number} is the closest and taxi {taxi_number} is assigned to pick them up")
             
         elif sim.config["rider_choice_rule"] == "shortest":
             rider_number, trip_dist = utils.find_shortest_trip(trips)
@@ -23,7 +22,6 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
             # now assign the closest idle taxi to THAT rider
             chosen_loc = sim.riders[rider_number].location
             dist = np.linalg.norm(np.array(location) - np.array(chosen_loc))
-            print(f"shortest-trip rider {rider_number} chosen; taxi {taxi_number} assigned ({dist} away)")
 
         elif sim.config["rider_choice_rule"] == "longest":
             rider_number, trip_dist = utils.find_longest_trip(trips)
@@ -31,7 +29,12 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
             # now assign the closest idle taxi to THAT rider
             chosen_loc = sim.riders[rider_number].location
             dist = np.linalg.norm(np.array(location) - np.array(chosen_loc))
-            print(f"longest-trip rider {rider_number} chosen; taxi {taxi_number} assigned ({dist} away)")
+
+        if sim.verbose:
+            print(
+                f"{round(sim.current_time, 2)} rider {rider_number} is chosen and taxi {taxi_number} assigned ({round(dist, 2)} away)"
+            )
+            
         # update the rider to be in service so they don't go offline
         rider = riders[rider_number]
         rider.update_service_status(service_status=True)
@@ -53,6 +56,39 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
         # also add the pickup time to the rider
         rider.pickup_time = journey_time
 
+def find_taxi(sim: Simulation, rider:Rider):
+    location = rider.location
+    rider_number = rider.number
+
+    # check all online taxis and assign the closest
+    taxis = sim.get_idle_taxis()
+    if taxis:
+        # checking for configs
+        taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
+
+        if sim.verbose:
+            print(
+                f"taxi {taxi_number} is the closest out of {len(taxis)} ({round(dist, 2)} away) and is assigned"
+            )
+
+        # update the rider to be in service so they don't go offline
+        rider = sim.riders[rider_number]
+        rider.update_service_status(service_status=True)
+
+        # update the taxi to no longer be idle
+        taxis[taxi_number].update_idle_status(idle_status=False)
+
+        # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
+        journey_time = sim.current_time + sim.distributions["journey"](dist)
+        sim.add_event(
+            journey_time,
+            "pickup",
+            event_data={"rider_number": rider_number, "taxi_number": taxi_number},
+        )
+
+        # also add the pickup time to the rider
+        rider.pickup_time = journey_time
+
 def execute_taxi_arrival(sim: Simulation):
     # get the taxi id we'll use to track it through the system
     sim.number_taxis += 1
@@ -64,9 +100,7 @@ def execute_taxi_arrival(sim: Simulation):
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} arrives")
 
     # add the taxi to the simulation
-    sim.taxis[taxi_number] = Taxi(taxi_number, location)
-    taxi = Taxi(taxi_number, location)
-    taxi.time_online = sim.current_time
+    sim.taxis[taxi_number] = Taxi(taxi_number, location, sim.current_time)
     departure_time = sim.current_time + sim.distributions["taxi-departure"]()
     # pass taxi number through to departure event so we can remove the correct taxi
     sim.add_event(
@@ -81,11 +115,11 @@ def execute_taxi_departure(sim: Simulation, taxi_number):
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} departs")
     
     taxi = sim.taxis.get(taxi_number)
-    taxi.time_offline = sim.current_time
+
     # if the taxi is currently idle then remove it
     # otherwise schedule if going offline, and then check this at the end of a drop off event
     if taxi.idle:
-        taxi.go_offline()
+        taxi.go_offline(sim.current_time)
     else:
         taxi.schedule_offline()
 
@@ -104,7 +138,8 @@ def execute_rider_arrival(sim: Simulation):
             f"{round(sim.current_time, 2)}: rider {rider_number} arrives at ({round(location[0], 1)}, {round(location[1], 1)})"
         )
 
-    sim.riders[rider_number] = Rider(rider_number, location, destination, sim.current_time)
+    rider = Rider(rider_number, location, destination, sim.current_time)
+    sim.riders[rider_number] = rider
 
     cancellation_time = sim.current_time + sim.distributions["rider-cancellation"]()
     # pass rider number through to cancellation event
@@ -118,31 +153,12 @@ def execute_rider_arrival(sim: Simulation):
     arrival_time = sim.current_time + sim.distributions["rider-arrival"]()
     sim.add_event(arrival_time, "rider-arrival")
 
-    # check all online taxis and assign the closest
-    taxis = sim.get_idle_taxis()
-    if taxis:
-        # checking for cinfigs
-        taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
-        print(f"taxi {taxi_number} is the closest out of {len(taxis)} ({dist} away) and is assigned the job")
-        
-
-        # update the rider to be in service so they don't go offline
-        rider = sim.riders[rider_number]
-        rider.update_service_status(service_status=True)
-
-        # update the taxi to no longer be idle
-        taxis[taxi_number].update_idle_status(idle_status=False)
-
-        # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
-        journey_time = sim.current_time + sim.distributions["journey"](dist)
-        sim.add_event(
-            journey_time,
-            "pickup",
-            event_data={"rider_number": rider_number, "taxi_number": taxi_number}
-        )
-
-        # also add the pickup time to the rider
-        rider.pickup_time = journey_time
+    if sim.batch_length:
+        if not sim.batching:
+                sim.change_batching_status(True)
+                sim.add_event(sim.current_time + sim.batch_length, 'batch-end')
+    else:
+        find_taxi(sim, rider)
 
 def execute_rider_cancellation(sim: Simulation, rider_number):
     rider = sim.riders.get(rider_number)
@@ -191,11 +207,20 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
     # if a rider is staying online then get them to pick up the closest rider
     # otherwise get them to log off
     if taxi.going_offline:
-        taxi.go_offline()
+        taxi.go_offline(sim.current_time)
     else:
         taxi.update_idle_status(idle_status=True)
         taxi.update_location(rider.destination)
-        schedule_taxi_pickup(sim, sim.taxis.get(taxi_number))
+
+        if sim.batch_length:
+            if not sim.batching:
+                sim.change_batching_status(True)
+                sim.add_event(sim.current_time + sim.batch_length, 'batch-end')
+        else:
+            find_rider(sim, taxi)
+
+def execute_batch_end(sim: Simulation):
+    print("handling batch event!")
 
 def execute_termination(sim: Simulation):
     # distance = (taxi.distance_covered for taxi in sim.taxis.values())
@@ -211,7 +236,7 @@ def execute_termination(sim: Simulation):
     # #print(len(list(pickup_time)))
     # #print(sim.number_riders)
 
- 
     # for online, pickup in zip(online_time, pickup_time):
     #     print((pickup - online) * 60)
-    print(f'{round(sim.current_time, 2)}: terminating simulation')
+    if sim.verbose:
+        print(f'{round(sim.current_time, 2)}: terminating simulation')

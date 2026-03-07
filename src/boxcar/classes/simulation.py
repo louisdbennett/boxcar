@@ -10,17 +10,21 @@ class Simulation:
         distributions: Any = None, 
         handlers: Any = None, 
         simulation_length: int = 24,
+        batch_length: float = None,
         verbose: bool= True
     ):
         # fixed values
         self.boundary_length = 20
         self.simulation_length = simulation_length
         self.verbose = verbose
+        self.batch_length = batch_length
 
         # type things that can change to throw errors
         self.event_calendar: List[Dict[str, Any]] = []
         self.distributions: Dict[str, Callable[[Any], None]] = {}
         self.event_handlers: Dict[str, Callable[[Any], None]] = {}
+        self.batching = False
+
         # track the total number of taxis so they each get a unique id
         self.number_taxis: int = 0
         self.number_riders: int = 0
@@ -47,6 +51,7 @@ class Simulation:
             self.register_event_handler("rider-cancellation", handlers.handle_rider_cancellation)
             self.register_event_handler("pickup", handlers.handle_rider_pickup)
             self.register_event_handler("dropoff", handlers.handle_rider_dropoff)
+            self.register_event_handler("batch-end", handlers.handle_batch_end)
 
         first_taxi_arrival = self.current_time + self.distributions["taxi-arrival"]()
         first_rider_arrival = self.current_time + self.distributions["rider-arrival"]()
@@ -111,3 +116,6 @@ class Simulation:
 
     def get_waiting_riders(self) -> Dict[int, Rider]:
         return {num: rider for num, rider in self.riders.items() if (not rider.in_service and not rider.cancelled and not rider.at_destination)}
+
+    def change_batching_status(self, status:bool) -> None:
+        self.batching = status

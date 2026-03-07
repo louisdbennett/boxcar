@@ -2,7 +2,7 @@ from typing import Tuple
 
 class Taxi:
     # this class tracks taxis through the system so we can remove the correct taxis as they go offline
-    def __init__(self, number:int, location:Tuple):
+    def __init__(self, number:int, location:Tuple, time:float):
         self.number = number
         self.location = location
         self.idle = True
@@ -12,6 +12,7 @@ class Taxi:
         self.money_made = 0
         self.time_online = 0
         self.time_offline = 0
+
     def schedule_offline(self):
         self.going_offline = True
 
@@ -21,5 +22,6 @@ class Taxi:
     def update_location(self, location):
         self.location = location
 
-    def go_offline(self):
+    def go_offline(self, time):
         self.online = False
+        self.time_offline = time
