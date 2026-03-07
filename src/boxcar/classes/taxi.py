@@ -14,6 +14,7 @@ class Taxi:
         self.time_offline = 0
         self.path: List[Dict[str, Any]] = []
         self._active_segment: Optional[Dict[str, Any]] = None
+    
     def schedule_offline(self):
         self.going_offline = True
 
