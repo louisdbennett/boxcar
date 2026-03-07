@@ -247,20 +247,5 @@ def execute_batch_end(sim: Simulation):
     print("handling batch event!")
 
 def execute_termination(sim: Simulation):
-    # distance = (taxi.distance_covered for taxi in sim.taxis.values())
-    # money_made = (taxi.money_made for taxi in sim.taxis.values())
-    #print('Profit:')
-    #print(sum(taxi_metrics[0] - 0.2 * taxi_metrics[1] for taxi_metrics in zip(money_made, distance)))
-
-    # online_time = (rider.online_time for rider in sim.riders.values() if rider.pickup_time)
-    # pickup_time = (rider.pickup_time for rider in sim.riders.values() if rider.pickup_time)
-
-    # #print('Rider Metrics:')
-    # #print(len(list(online_time)))
-    # #print(len(list(pickup_time)))
-    # #print(sim.number_riders)
-
-    # for online, pickup in zip(online_time, pickup_time):
-    #     print((pickup - online) * 60)
     if sim.verbose:
         print(f'{round(sim.current_time, 2)}: terminating simulation')
