@@ -10,6 +10,7 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
 
     # picking up closest idle passengers if any exist
     riders = sim.get_waiting_riders()
+    trips = utils.get_trips(riders)
     if riders:
         if sim.config["rider_choice_rule"] == "closest":
             rider_number, dist = utils.find_closest(location, utils.get_locations(riders))
@@ -17,14 +18,6 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
                 print(f"{round(sim.current_time, 2)}: rider {rider_number} is the closest and taxi {taxi_number} is assigned to pick them up")
             
         elif sim.config["rider_choice_rule"] == "shortest":
-            # get a list of trips
-            trips = [
-                (
-                    rid, np.linalg.norm(np.array(r.location) - np.array(r.destination))
-                    )
-                for rid, r in riders.items()
-                ]
-
             rider_number, trip_dist = utils.find_shortest_trip(trips)
 
             # now assign the closest idle taxi to THAT rider
@@ -33,14 +26,6 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
             print(f"shortest-trip rider {rider_number} chosen; taxi {taxi_number} assigned ({dist} away)")
 
         elif sim.config["rider_choice_rule"] == "longest":
-            # get a list of trips
-            trips = [
-                (
-                    rid, np.linalg.norm(np.array(r.location) - np.array(r.destination))
-                    )
-                for rid, r in riders.items()
-                ]
-
             rider_number, trip_dist = utils.find_longest_trip(trips)
 
             # now assign the closest idle taxi to THAT rider

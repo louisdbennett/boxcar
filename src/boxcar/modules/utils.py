@@ -22,3 +22,11 @@ def find_shortest_trip(trips: Iterable[Tuple[int, float]]) -> Tuple[int, float]:
 
 def find_longest_trip(trips: Iterable[Tuple[int, float]]) -> Tuple[int, float]:
     return max(trips, key=lambda x: x[1])
+
+def get_trips(riders):
+    return     [
+                (
+                    rid, np.linalg.norm(np.array(r.location) - np.array(r.destination))
+                    )
+                for rid, r in riders.items()
+                ]
