@@ -45,8 +45,6 @@ def get_histos(
     csv_path: str = "outputs/results.csv",
     outdir: str = "outputs/histograms_by_config",
     bins: int = 20,
-    width: int = 10,
-    height: int = 4,
     dpi: int = 200,
 ):
     df = pd.read_csv(csv_path)
