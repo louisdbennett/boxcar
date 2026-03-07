@@ -26,6 +26,9 @@ class Simulation:
         self.riders: Dict[int, Rider] = {}
         self.current_time: float = 0
 
+        # current config
+        self.config: Dict[str, Any] = {}
+
         if distributions:
             self.register_distribution("location", distributions.generate_location)
             self.register_distribution("taxi-arrival", distributions.generate_taxi_arrival)
@@ -102,7 +105,7 @@ class Simulation:
 
     # some helper functions
     def get_idle_taxis(self) -> Dict[int, Taxi]:
-        return {num: taxi for num, taxi in self.taxis.items() if taxi.idle and taxi.online}
+        return {num: taxi for num, taxi in self.taxis.items() if taxi.idle}
 
     def get_waiting_riders(self) -> Dict[int, Rider]:
         return {num: rider for num, rider in self.riders.items() if (not rider.in_service and not rider.cancelled and not rider.at_destination)}

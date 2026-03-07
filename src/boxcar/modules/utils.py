@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 from scipy.spatial.distance import cdist
-from typing import Tuple
+from typing import Iterable, Tuple
 
 def get_locations(objs) -> npt.ArrayLike:
     return np.array([
@@ -16,3 +16,9 @@ def find_closest(
     dist = cdist(np.array([location]), comparison_locations[:, :2], metric="euclidean")
     ind = np.argmin(dist)
     return comparison_locations[:, 2][ind], np.min(dist)
+
+def find_shortest_trip(trips: Iterable[Tuple[int, float]]) -> Tuple[int, float]:
+    return min(trips, key=lambda x: x[1])
+
+def find_longest_trip(trips: Iterable[Tuple[int, float]]) -> Tuple[int, float]:
+    return max(trips, key=lambda x: x[1])

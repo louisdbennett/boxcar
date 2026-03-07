@@ -2,6 +2,7 @@ from boxcar.classes.rider import Rider
 from boxcar.classes.simulation import Simulation
 from boxcar.classes.taxi import Taxi
 import boxcar.modules.utils as utils
+import numpy as np
 
 def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
     location = taxi.location
@@ -10,9 +11,40 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
     # picking up closest idle passengers if any exist
     riders = sim.get_waiting_riders()
     if riders:
-        rider_number, dist = utils.find_closest(location, utils.get_locations(riders))
-        print(f"rider {rider_number} is the closest and taxi {taxi_number} is assigned to pick them up")
+        if sim.config["rider_choice_rule"] == "closest":
+            rider_number, dist = utils.find_closest(location, utils.get_locations(riders))
+            print(f"rider {rider_number} is the closest and taxi {taxi_number} is assigned to pick them up")
+        elif sim.config["rider_choice_rule"] == "shortest":
+            # get a list of trips
+            trips = [
+                (
+                    rid, np.linalg.norm(np.array(r.location) - np.array(r.destination))
+                    )
+                for rid, r in riders.items()
+                ]
 
+            rider_number, trip_dist = utils.find_shortest_trip(trips)
+
+            # now assign the closest idle taxi to THAT rider
+            chosen_loc = sim.riders[rider_number].location
+            dist = np.linalg.norm(np.array(location) - np.array(chosen_loc))
+            print(f"shortest-trip rider {rider_number} chosen; taxi {taxi_number} assigned ({dist} away)")
+
+        elif sim.config["rider_choice_rule"] == "longest":
+            # get a list of trips
+            trips = [
+                (
+                    rid, np.linalg.norm(np.array(r.location) - np.array(r.destination))
+                    )
+                for rid, r in riders.items()
+                ]
+
+            rider_number, trip_dist = utils.find_longest_trip(trips)
+
+            # now assign the closest idle taxi to THAT rider
+            chosen_loc = sim.riders[rider_number].location
+            dist = np.linalg.norm(np.array(location) - np.array(chosen_loc))
+            print(f"shortest-trip rider {rider_number} chosen; taxi {taxi_number} assigned ({dist} away)")
         # update the rider to be in service so they don't go offline
         rider = riders[rider_number]
         rider.update_service_status(service_status=True)
@@ -97,8 +129,10 @@ def execute_rider_arrival(sim: Simulation):
     # check all online taxis and assign the closest
     taxis = sim.get_idle_taxis()
     if taxis:
+        # checking for cinfigs
         taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
         print(f"taxi {taxi_number} is the closest out of {len(taxis)} ({dist} away) and is assigned the job")
+        
 
         # update the rider to be in service so they don't go offline
         rider = sim.riders[rider_number]
