@@ -13,25 +13,35 @@ CONFIGS = {
 }
 
 def boxcar():
-    first = True
-    for trial in range(200):
-        for rider_choice_rule in CONFIGS["rider_choice_rule"]:
-                cfg = {
-                    "rider_choice_rule": rider_choice_rule,
-                }
-                print(f"Running config: {cfg['rider_choice_rule']}")
-                distributions = Distributions(None)
-                handlers = Handlers(None)
+    config = {"rider_choice_rule": "closest", "batch_length":0.1}
+    distributions = Distributions(None)
+    handlers = Handlers(None)
+
+    sim = Simulation(config, distributions, handlers, verbose=True)
+    distributions.simulation = sim
+    handlers.simulation = sim
+
+    sim.run()
+
+    # first = True
+    # for trial in range(200):
+    #     for rider_choice_rule in CONFIGS["rider_choice_rule"]:
+    #             cfg = {
+    #                 "rider_choice_rule": rider_choice_rule,
+    #             }
+    #             print(f"Running config: {cfg['rider_choice_rule']}")
+    #             distributions = Distributions(None)
+    #             handlers = Handlers(None)
                 
                 
-                sim = Simulation(distributions, handlers, verbose=True, batch_length=0.1)
-                sim.config = cfg
-                distributions.simulation = sim
-                handlers.simulation = sim
+    #             sim = Simulation(distributions, handlers, verbose=True, batch_length=0.1)
+    #             sim.config = cfg
+    #             distributions.simulation = sim
+    #             handlers.simulation = sim
                 
                 
-                sim.run()
-                row = save_results(sim, cfg, csv_path="outputs/results.csv",run_name=trial, rewrite=first)
+    #             sim.run()
+    #             row = save_results(sim, cfg, csv_path="outputs/results.csv",run_name=trial, rewrite=first)
                 #high_id = row["highest_earning_taxi_id"]
                 #low_id  = row["lowest_earning_taxi_id"]
                 #plot_taxi_path(sim.taxis[high_id], filename=f"high_{cfg['rider_choice_rule']}.png")
@@ -39,8 +49,8 @@ def boxcar():
 
 
 
-                first = False
-    get_histos()
+                # first = False
+    # get_histos()
 
 
 boxcar()
