@@ -56,15 +56,11 @@ def get_histos(
     }
 
     cols = [c for c in df.columns if c not in skip]
-    numeric_cols = [c for c in cols if pd.api.types.is_numeric_dtype(df[c])]
 
     os.makedirs(outdir, exist_ok=True)
 
-    for col in numeric_cols:
-        data = df[[col]].dropna()
-        if data.empty:
-            continue
-
+    for col in cols:
+        data = df[[col]]
         p = (
             ggplot(data, aes(x=col))
             + geom_histogram(aes(y="..density.."), bins=bins, fill="#4C78A8", color="#2F2F2F", alpha=0.75)
@@ -80,5 +76,3 @@ def get_histos(
 
         fname = col.replace(" ", "_").replace("/", "_") + ".png"
         p.save(os.path.join(outdir, fname), dpi=dpi, verbose=False)
-
-    return numeric_cols
