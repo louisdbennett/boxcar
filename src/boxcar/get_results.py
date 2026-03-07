@@ -41,17 +41,17 @@ def save_results(
 
     row: Dict[str, Any] = {
         "run_name": run_name,
-        "cfg": str(cfg),
-        "total_money_made": total_money,
-        "total_distance_driven": total_distance,
-        "average profit": profit_avg,
-        "customers_served": served,
-        "customers_cancelled": cancelled,
-        "waiting_time": waiting_total,
-        "highest_earning_taxi_id": highest_id,
-        "highest_earning_taxi_per_hour": highest_norm,
-        "lowest_earning_taxi_id": lowest_id,
-        "lowest_earning_taxi_per_hour": lowest_norm,
+        "cfg": str(cfg['rider_choice_rule']),
+        "Total money_made": total_money,
+        "Total distance driven": total_distance,
+        "Average profit": profit_avg,
+        "Customers served": served,
+        "Customers cancelled": cancelled,
+        "Waiting time": waiting_total,
+        "Highest earning taxi id": highest_id,
+        "Highest earning taxi per hour": highest_norm,
+        "Lowest earning taxi id": lowest_id,
+        "Lowest earning taxi per hour": lowest_norm,
     }
 
     os.makedirs(os.path.dirname(csv_path) or ".", exist_ok=True)

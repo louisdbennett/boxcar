@@ -40,12 +40,13 @@ def plot_taxi_path(taxi, outdir="outputs/figures", filename=None):
     plt.close(fig)
     return outpath
 
+
 def get_histos(
     csv_path: str = "outputs/results.csv",
-    outdir: str = "outputs/histograms",
+    outdir: str = "outputs/histograms_by_config",
     bins: int = 20,
-    width: int = 7,
-    height: int = 5,
+    width: int = 10,
+    height: int = 4,
     dpi: int = 200,
 ):
     df = pd.read_csv(csv_path)
@@ -55,24 +56,41 @@ def get_histos(
         "cfg"
     }
 
-    cols = [c for c in df.columns if c not in skip]
+    cols = [
+        c for c in df.columns
+        if c not in skip
+    ]
 
     os.makedirs(outdir, exist_ok=True)
 
-    for col in cols:
-        data = df[[col]]
-        p = (
-            ggplot(data, aes(x=col))
-            + geom_histogram(aes(y="..density.."), bins=bins, fill="#4C78A8", color="#2F2F2F", alpha=0.75)
-            + geom_density(color="#F58518", size=1.2, alpha=0.0)
-            + labs(title=f"Distribution of {col}", x=col, y="Density")
-            + theme_minimal()
-            + theme(
-                figure_size=(width, height),
-                plot_title=element_text(size=12, weight="bold"),
-                axis_title=element_text(size=10),
-            )
-        )
+    cfgs = df["cfg"].unique()
 
-        fname = col.replace(" ", "_").replace("/", "_") + ".png"
-        p.save(os.path.join(outdir, fname), dpi=dpi, verbose=False)
+    for cfg_val in cfgs:
+        mask = df["cfg"] == cfg_val
+        sub = df.loc[mask]
+
+        cfg_tag = str(cfg_val).replace(" ", "").replace("{", "").replace("}", "").replace("'", "")
+        cfg_tag = cfg_tag.replace(":", "_").replace(",", "__")
+        if len(cfg_tag) > 120:
+            cfg_tag = cfg_tag[:120]
+
+        for col in cols:
+            data = sub[[col]]
+            if data.empty:
+                continue
+
+            p = (
+                ggplot(data, aes(x=col))
+                + geom_histogram(aes(y="..density.."), bins=bins, fill="#4C78A8", color="#2F2F2F", alpha=0.75)
+                + geom_density(color="#F58518", size=1.1)
+                + labs(title=f"{col} (cfg={cfg_val})", x=col, y="Density")
+                + theme_minimal()
+                + theme(
+                    figure_size=(7, 5),
+                    plot_title=element_text(size=11, weight="bold"),
+                    axis_title=element_text(size=10),
+                )
+            )
+
+            fname = f"{col.replace(' ', '_')}_{cfg_tag}.png"
+            p.save(os.path.join(outdir, fname), dpi=dpi, verbose=False)

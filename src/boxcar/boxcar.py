@@ -19,7 +19,7 @@ def boxcar():
                 cfg = {
                     "rider_choice_rule": rider_choice_rule,
                 }
-                print(f"Running config: {cfg}")
+                print(f"Running config: {cfg['rider_choice_rule']}")
                 distributions = Distributions(None)
                 handlers = Handlers(None)
                 
