@@ -1,29 +1,7 @@
-# src/boxcar/save_results.py
-
-from __future__ import annotations
-
 import csv
 import os
 from typing import Any, Dict, Optional
-
 from boxcar.classes.simulation import Simulation
-
-
-def _taxi_hours_online(sim: Simulation, taxi: Any) -> Optional[float]:
-    start = getattr(taxi, "online_start", None)
-    if start is None:
-        return None
-
-    end = getattr(taxi, "online_end", None)
-    if end is None:
-        end = getattr(sim, "current_time", None)
-
-    if end is None:
-        return None
-
-    hours = float(end) - float(start)
-    return max(hours, 0.0)
-
 
 def save_results(
     sim: Simulation,

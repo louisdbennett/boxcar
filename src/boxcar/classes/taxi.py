@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List, Dict, Any, Optional
 
 class Taxi:
     # this class tracks taxis through the system so we can remove the correct taxis as they go offline
@@ -12,7 +12,8 @@ class Taxi:
         self.money_made = 0
         self.time_online = 0
         self.time_offline = 0
-
+        self.path: List[Dict[str, Any]] = []
+        self._active_segment: Optional[Dict[str, Any]] = None
     def schedule_offline(self):
         self.going_offline = True
 
@@ -25,3 +26,19 @@ class Taxi:
     def go_offline(self, time):
         self.online = False
         self.time_offline = time
+
+    def start_segment(self, t_start: float, start: Tuple, end: Tuple, has_rider: bool):
+        self._active_segment = {
+            "has_rider": has_rider,
+            "t_start": t_start,
+            "t_end": None,
+            "start": start,
+            "end": end,
+        }
+
+    def end_segment(self, t_end: float):
+        if self._active_segment is None:
+            return
+        self._active_segment["t_end"] = t_end
+        self.path.append(self._active_segment)
+        self._active_segment = None
