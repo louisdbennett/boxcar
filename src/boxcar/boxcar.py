@@ -20,7 +20,7 @@ def boxcar():
                 handlers = Handlers(None)
                 
                 
-                sim = Simulation(distributions, handlers, verbose=False)
+                sim = Simulation(distributions, handlers, verbose=True, batch_length=0.1)
                 sim.config = cfg
                 distributions.simulation = sim
                 handlers.simulation = sim

@@ -10,6 +10,9 @@ class Rider:
         self.at_destination = False
         self.online_time = time
         self.pickup_time = False
+        self.taxi_en_route = False
+        self.in_taxi = False
+        self.assigned_driver = None
 
     def update_location(self, location):
         self.location = location
