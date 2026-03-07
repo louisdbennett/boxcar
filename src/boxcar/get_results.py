@@ -29,7 +29,7 @@ def save_results(
     sim: Simulation,
     cfg: Dict[str, Any],
     csv_path: str = "outputs/results.csv",
-    run_name: Optional[str] = None,
+    run_name: str = None,
     rewrite: bool = True,
 ) -> None:
     taxis = list(sim.taxis.values())
