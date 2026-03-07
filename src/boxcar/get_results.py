@@ -40,7 +40,7 @@ def save_results(
     lowest_id, lowest_norm = low_taxi.number, low_rate
 
     row: Dict[str, Any] = {
-        "run_name": run_name or "",
+        "run_name": run_name,
         "cfg": str(cfg),
         "total_money_made": total_money,
         "total_distance_driven": total_distance,

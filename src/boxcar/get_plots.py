@@ -2,6 +2,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+import pandas as pd
+from plotnine import ggplot, aes, geom_histogram, geom_density, labs,theme_minimal, theme, element_text
+
 
 def plot_taxi_path(taxi, outdir="outputs/figures", filename=None):
     path = taxi.path 
@@ -36,3 +39,52 @@ def plot_taxi_path(taxi, outdir="outputs/figures", filename=None):
     fig.savefig(outpath, dpi=200)
     plt.close(fig)
     return outpath
+
+
+
+import os
+import pandas as pd
+
+
+def get_histos(
+    csv_path: str = "outputs/results.csv",
+    outdir: str = "outputs/histograms",
+    bins: int = 20,
+    width: int = 7,
+    height: int = 5,
+    dpi: int = 200,
+):
+    df = pd.read_csv(csv_path)
+
+    skip = {
+        "run_name",
+        "cfg"
+    }
+
+    cols = [c for c in df.columns if c not in skip]
+    numeric_cols = [c for c in cols if pd.api.types.is_numeric_dtype(df[c])]
+
+    os.makedirs(outdir, exist_ok=True)
+
+    for col in numeric_cols:
+        data = df[[col]].dropna()
+        if data.empty:
+            continue
+
+        p = (
+            ggplot(data, aes(x=col))
+            + geom_histogram(aes(y="..density.."), bins=bins, fill="#4C78A8", color="#2F2F2F", alpha=0.75)
+            + geom_density(color="#F58518", size=1.2, alpha=0.0)
+            + labs(title=f"Distribution of {col}", x=col, y="Density")
+            + theme_minimal()
+            + theme(
+                figure_size=(width, height),
+                plot_title=element_text(size=12, weight="bold"),
+                axis_title=element_text(size=10),
+            )
+        )
+
+        fname = col.replace(" ", "_").replace("/", "_") + ".png"
+        p.save(os.path.join(outdir, fname), dpi=dpi, verbose=False)
+
+    return numeric_cols

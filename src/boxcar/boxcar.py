@@ -3,6 +3,8 @@ from boxcar.classes.generate import Distributions
 from boxcar.classes.handlers import Handlers
 from boxcar.get_results import save_results
 from boxcar.get_plots import plot_taxi_path
+from boxcar.get_plots import get_histos
+
 
 CONFIGS = {
     "rider_choice_rule": ["closest", "shortest", "longest"],
@@ -38,4 +40,7 @@ def boxcar():
 
 
                 first = False
+    get_histos()
+
+
 boxcar()
