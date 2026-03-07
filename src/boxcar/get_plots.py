@@ -40,12 +40,6 @@ def plot_taxi_path(taxi, outdir="outputs/figures", filename=None):
     plt.close(fig)
     return outpath
 
-
-
-import os
-import pandas as pd
-
-
 def get_histos(
     csv_path: str = "outputs/results.csv",
     outdir: str = "outputs/histograms",
