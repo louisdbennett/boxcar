@@ -12,7 +12,8 @@ CONFIGS = {
 
 def boxcar():
     first = True
-    for rider_choice_rule in CONFIGS["rider_choice_rule"]:
+    for trial in range(200):
+        for rider_choice_rule in CONFIGS["rider_choice_rule"]:
                 cfg = {
                     "rider_choice_rule": rider_choice_rule,
                 }
@@ -28,11 +29,11 @@ def boxcar():
                 
                 
                 sim.run()
-                row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
-                high_id = row["highest_earning_taxi_id"]
-                low_id  = row["lowest_earning_taxi_id"]
-                plot_taxi_path(sim.taxis[high_id], filename=f"high_{cfg['rider_choice_rule']}.png")
-                plot_taxi_path(sim.taxis[low_id], filename=f"low_{cfg['rider_choice_rule']}.png")
+                row = save_results(sim, cfg, csv_path="outputs/results.csv",run_name=trial, rewrite=first)
+                #high_id = row["highest_earning_taxi_id"]
+                #low_id  = row["lowest_earning_taxi_id"]
+                #plot_taxi_path(sim.taxis[high_id], filename=f"high_{cfg['rider_choice_rule']}.png")
+                #plot_taxi_path(sim.taxis[low_id], filename=f"low_{cfg['rider_choice_rule']}.png")
 
 
 
