@@ -73,7 +73,7 @@ def find_taxi(sim: Simulation, rider:Rider):
     if taxis:
         # checking for configs
         taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
-
+        taxi = taxis[taxi_number]
         if sim.verbose:
             print(
                 f"taxi {taxi_number} is the closest out of {len(taxis)} ({round(dist, 2)} away) and is assigned"
@@ -84,10 +84,16 @@ def find_taxi(sim: Simulation, rider:Rider):
         rider.update_service_status(service_status=True)
 
         # update the taxi to no longer be idle
-        taxis[taxi_number].update_idle_status(idle_status=False)
+        taxi.update_idle_status(idle_status=False)
 
         # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
         journey_time = sim.current_time + sim.distributions["journey"](dist)
+        taxi.start_segment(
+            t_start=sim.current_time,
+            start=taxi.location,
+            end=rider.location,
+            has_rider=False
+        )
         sim.add_event(
             journey_time,
             "pickup",
@@ -306,20 +312,5 @@ def execute_batch_end(sim: Simulation):
     print("batch end!")
 
 def execute_termination(sim: Simulation):
-    # distance = (taxi.distance_covered for taxi in sim.taxis.values())
-    # money_made = (taxi.money_made for taxi in sim.taxis.values())
-    #print('Profit:')
-    #print(sum(taxi_metrics[0] - 0.2 * taxi_metrics[1] for taxi_metrics in zip(money_made, distance)))
-
-    # online_time = (rider.online_time for rider in sim.riders.values() if rider.pickup_time)
-    # pickup_time = (rider.pickup_time for rider in sim.riders.values() if rider.pickup_time)
-
-    # #print('Rider Metrics:')
-    # #print(len(list(online_time)))
-    # #print(len(list(pickup_time)))
-    # #print(sim.number_riders)
-
-    # for online, pickup in zip(online_time, pickup_time):
-    #     print((pickup - online) * 60)
     if sim.verbose:
         print(f'{round(sim.current_time, 2)}: terminating simulation')
