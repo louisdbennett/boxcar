@@ -1,6 +1,6 @@
 import csv
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from boxcar.classes.simulation import Simulation
 
 def save_results(
@@ -21,6 +21,10 @@ def save_results(
 
     served = sum(1 for r in riders if getattr(r, "at_destination", False))
     cancelled = sum(1 for r in riders if getattr(r, "cancelled", False))
+
+    online_time = (rider.online_time for rider in sim.riders.values() if rider.pickup_time)
+    pickup_time = (rider.pickup_time for rider in sim.riders.values() if rider.pickup_time)
+    waiting_total = sum(pickup - online for online, pickup in zip(online_time, pickup_time))
 
     per_hour = []
     for t in taxis:
@@ -43,6 +47,7 @@ def save_results(
         "average profit": profit_avg,
         "customers_served": served,
         "customers_cancelled": cancelled,
+        "waiting_time": waiting_total,
         "highest_earning_taxi_id": highest_id,
         "highest_earning_taxi_per_hour": highest_norm,
         "lowest_earning_taxi_id": lowest_id,
