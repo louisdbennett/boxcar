@@ -44,6 +44,12 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
 
         # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
         journey_time = sim.current_time + sim.distributions["journey"](dist)
+        taxi.start_segment(
+            t_start=sim.current_time,
+            start=taxi.location,
+            end=rider.location,
+            has_rider=False
+        )
         sim.add_event(
             journey_time,
             "pickup",
@@ -173,6 +179,17 @@ def execute_rider_pickup(sim: Simulation, rider_number, taxi_number):
 
     journey_time = sim.current_time + sim.distributions["journey"](dist)
 
+    taxi.end_segment(t_end=sim.current_time)
+
+    taxi.update_location(rider.location)
+
+    taxi.start_segment(
+        t_start=sim.current_time,
+        start=rider.location,
+        end=rider.destination,
+        has_rider=True
+    )
+
     sim.add_event(
         journey_time,
         "dropoff",
@@ -190,6 +207,7 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
     rider.reach_destination()
     # if a rider is staying online then get them to pick up the closest rider
     # otherwise get them to log off
+    taxi.end_segment(t_end=sim.current_time)
     if taxi.going_offline:
         taxi.go_offline()
     else:
