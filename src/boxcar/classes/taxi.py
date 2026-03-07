@@ -11,7 +11,7 @@ class Taxi:
         self.distance_covered = 0
         self.money_made = 0
 
-    def go_offline(self):
+    def schedule_offline(self):
         self.going_offline = True
 
     def update_idle_status(self, idle_status=True):
@@ -20,7 +20,5 @@ class Taxi:
     def update_location(self, location):
         self.location = location
 
-    def make_offline(self, location):
+    def go_offline(self):
         self.online = False
-
-
