@@ -10,7 +10,8 @@ class Taxi:
         self.going_offline = False
         self.distance_covered = 0
         self.money_made = 0
-
+        self.time_online = 0
+        self.time_offline = 0
     def schedule_offline(self):
         self.going_offline = True
 

@@ -56,7 +56,6 @@ def schedule_taxi_pickup(sim: Simulation, taxi: Taxi):
 def execute_taxi_arrival(sim: Simulation):
     # get the taxi id we'll use to track it through the system
     sim.number_taxis += 1
-
     # generate the starting location of the taxi and get its id
     location = sim.distributions["location"]()
     taxi_number = sim.number_taxis
@@ -66,7 +65,8 @@ def execute_taxi_arrival(sim: Simulation):
 
     # add the taxi to the simulation
     sim.taxis[taxi_number] = Taxi(taxi_number, location)
-
+    taxi = Taxi(taxi_number, location)
+    taxi.time_online = sim.current_time
     departure_time = sim.current_time + sim.distributions["taxi-departure"]()
     # pass taxi number through to departure event so we can remove the correct taxi
     sim.add_event(
@@ -81,7 +81,7 @@ def execute_taxi_departure(sim: Simulation, taxi_number):
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} departs")
     
     taxi = sim.taxis.get(taxi_number)
-
+    taxi.time_offline = sim.current_time
     # if the taxi is currently idle then remove it
     # otherwise schedule if going offline, and then check this at the end of a drop off event
     if taxi.idle:

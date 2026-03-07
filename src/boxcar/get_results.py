@@ -1,0 +1,90 @@
+# src/boxcar/save_results.py
+
+from __future__ import annotations
+
+import csv
+import os
+from typing import Any, Dict, Optional
+
+from boxcar.classes.simulation import Simulation
+
+
+def _taxi_hours_online(sim: Simulation, taxi: Any) -> Optional[float]:
+    start = getattr(taxi, "online_start", None)
+    if start is None:
+        return None
+
+    end = getattr(taxi, "online_end", None)
+    if end is None:
+        end = getattr(sim, "current_time", None)
+
+    if end is None:
+        return None
+
+    hours = float(end) - float(start)
+    return max(hours, 0.0)
+
+
+def save_results(
+    sim: Simulation,
+    cfg: Dict[str, Any],
+    csv_path: str = "outputs/results.csv",
+    run_name: Optional[str] = None,
+    rewrite: bool = True,
+) -> None:
+    taxis = list(sim.taxis.values())
+    riders = list(sim.riders.values())
+
+    total_money = sum(t.money_made for t in taxis)
+    total_distance = sum(t.distance_covered for t in taxis)
+
+    profit_total = sum((t.money_made - t.distance_covered) for t in taxis)
+    profit_avg = profit_total/sum(1 for t in taxis)
+
+    served = sum(1 for r in riders if getattr(r, "at_destination", False))
+    cancelled = sum(1 for r in riders if getattr(r, "cancelled", False))
+
+    per_hour = []
+    for t in taxis:
+        hrs = t.time_offline - t.time_online
+        if hrs is None or hrs <= 0:
+            continue
+        per_hour.append((t, t.money_made / hrs))
+
+
+    high_taxi, high_rate = max(per_hour, key=lambda x: x[1])
+    low_taxi, low_rate = min(per_hour, key=lambda x: x[1])
+    highest_id, highest_norm = high_taxi.number, high_rate
+    lowest_id, lowest_norm = low_taxi.number, low_rate
+
+    row: Dict[str, Any] = {
+        "run_name": run_name or "",
+        "cfg": str(cfg),
+        "total_money_made": total_money,
+        "total_distance_driven": total_distance,
+        "average profit": profit_avg,
+        "customers_served": served,
+        "customers_cancelled": cancelled,
+        "highest_earning_taxi_id": highest_id,
+        "highest_earning_taxi_per_hour": highest_norm,
+        "lowest_earning_taxi_id": lowest_id,
+        "lowest_earning_taxi_per_hour": lowest_norm,
+    }
+
+    os.makedirs(os.path.dirname(csv_path) or ".", exist_ok=True)
+
+    mode = "w" if rewrite else "a"
+    file_exists = os.path.exists(csv_path)
+
+    with open(csv_path, mode, newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
+
+        if rewrite or not file_exists:
+            writer.writeheader()
+
+        writer.writerow(row)
+    '''with open(csv_path, "a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(row)'''
