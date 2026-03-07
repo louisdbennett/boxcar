@@ -61,6 +61,7 @@ def save_results(
             writer.writeheader()
 
         writer.writerow(row)
+    return row
     '''with open(csv_path, "a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(row.keys()))
         if not file_exists:

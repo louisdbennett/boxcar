@@ -71,7 +71,7 @@ def find_taxi(sim: Simulation, rider:Rider):
     if taxis:
         # checking for configs
         taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
-
+        taxi = taxis[taxi_number]
         if sim.verbose:
             print(
                 f"taxi {taxi_number} is the closest out of {len(taxis)} ({round(dist, 2)} away) and is assigned"
@@ -82,10 +82,16 @@ def find_taxi(sim: Simulation, rider:Rider):
         rider.update_service_status(service_status=True)
 
         # update the taxi to no longer be idle
-        taxis[taxi_number].update_idle_status(idle_status=False)
+        taxi.update_idle_status(idle_status=False)
 
         # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
         journey_time = sim.current_time + sim.distributions["journey"](dist)
+        taxi.start_segment(
+            t_start=sim.current_time,
+            start=taxi.location,
+            end=rider.location,
+            has_rider=False
+        )
         sim.add_event(
             journey_time,
             "pickup",
