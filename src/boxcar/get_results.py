@@ -16,8 +16,8 @@ def save_results(
     total_money = sum(t.money_made for t in taxis)
     total_distance = sum(t.distance_covered for t in taxis)
 
-    profit_total = sum((t.money_made - t.distance_covered) for t in taxis)
-    profit_avg = profit_total/sum(1 for t in taxis)
+    profit_total = sum((t.money_made - 0.2 * t.distance_covered) for t in taxis)
+    profit_avg = profit_total / sum(1 for t in taxis)
 
     served = sum(1 for r in riders if getattr(r, "at_destination", False))
     cancelled = sum(1 for r in riders if getattr(r, "cancelled", False))
