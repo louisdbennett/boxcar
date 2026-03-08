@@ -4,6 +4,7 @@ from boxcar.classes.handlers import Handlers
 from boxcar.get_results import save_results
 from boxcar.get_plots import plot_taxi_path
 from boxcar.get_plots import get_histos
+from boxcar.test_hypothesis import test_all_configs
 
 
 CONFIGS = {
@@ -15,16 +16,33 @@ CONFIGS = {
 
 def boxcar():
     first = True
-    for cr in CONFIGS['rider_choice_rule']:
-        if cr == 'closest':
-            for ms in CONFIGS['matching_strategy']:
-                if ms == 'batching': 
-                    for bl in CONFIGS['batch_length']:
+    for trial in range(200):
+        for cr in CONFIGS['rider_choice_rule']:
+            if cr == 'closest':
+                for ms in CONFIGS['matching_strategy']:
+                    if ms == 'batching': 
+                        for bl in CONFIGS['batch_length']:
+                            cfg = {
+                                'rider_choice_rule': cr,
+                                'matching_strategy': ms,
+                                'batch_length': bl
+                                }
+                            distributions = Distributions(None)
+                            handlers = Handlers(None)
+
+                            sim = Simulation(cfg, distributions, handlers, verbose=True)
+                            distributions.simulation = sim
+                            handlers.simulation = sim
+
+                            sim.run()
+
+                            row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
+                            first = False
+                    else:
                         cfg = {
-                            'rider_choice_rule': cr,
-                            'matching_strategy': ms,
-                            'batch_length': bl
-                            }
+                                'rider_choice_rule': cr,
+                                'matching_strategy': ms,
+                                }
                         distributions = Distributions(None)
                         handlers = Handlers(None)
 
@@ -36,37 +54,29 @@ def boxcar():
 
                         row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
                         first = False
-                else:
-                    cfg = {
-                            'rider_choice_rule': cr,
-                            'matching_strategy': ms,
-                            }
-                    distributions = Distributions(None)
-                    handlers = Handlers(None)
+            else: 
+                cfg = {
+                    'rider_choice_rule': cr,
+                    }
+                distributions = Distributions(None)
+                handlers = Handlers(None)
 
-                    sim = Simulation(cfg, distributions, handlers, verbose=True)
-                    distributions.simulation = sim
-                    handlers.simulation = sim
+                sim = Simulation(cfg, distributions, handlers, verbose=True)
+                distributions.simulation = sim
+                handlers.simulation = sim
 
-                    sim.run()
+                sim.run()
 
-                    row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
-                    first = False
-        else: 
-            cfg = {
-                'rider_choice_rule': cr,
-                }
-            distributions = Distributions(None)
-            handlers = Handlers(None)
+                row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
+                first = False
+    
+    test_all_configs(
+        csv_path="outputs/results.csv",
+        baseline_cfg="cr=closest, ms=None, bl=None",
+        out_csv="outputs/hypothesis_tests_all_vs_baseline.csv",
+        alpha=0.05
+        )
 
-            sim = Simulation(cfg, distributions, handlers, verbose=True)
-            distributions.simulation = sim
-            handlers.simulation = sim
-
-            sim.run()
-
-            row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
-            first = False
 
 
     #config = {"rider_choice_rule": "closest", "batch_length":0.1}
