@@ -10,8 +10,6 @@ class Taxi:
         self.going_offline = False
         self.distance_covered = 0
         self.money_made = 0
-        self.time_online = 0
-        self.time_offline = 0
         self.origin_time = 0
         self.destination_time = 0
         self.origin_loc = location
@@ -20,6 +18,13 @@ class Taxi:
         self.passenger_id = None
         self.path: List[Dict[str, Any]] = []
         self._active_segment: Optional[Dict[str, Any]] = None
+        self.distance_covered_reassign = 0
+        
+        self.time_online = time
+        self.time_offline = None
+        self.path: List[Dict[str, Any]] = []
+        self._active_segment: Optional[Dict[str, Any]] = None
+    
         self.distance_covered_reassign = 0
         
     def schedule_offline(self):

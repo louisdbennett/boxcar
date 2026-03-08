@@ -107,9 +107,9 @@ def execute_taxi_arrival(sim: Simulation):
     # get the taxi id we'll use to track it through the system
     sim.number_taxis += 1
     # generate the starting location of the taxi and get its id
-    location = sim.distributions["location"]()
-    taxi_number = sim.number_taxis
+    location = sim.distributions["taxi-location"]()
 
+    taxi_number = sim.number_taxis
     if sim.verbose:
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} arrives at ({round(location[0], 1)},{round(location[1], 1)})")
 
@@ -141,11 +141,9 @@ def execute_rider_arrival(sim: Simulation):
     # get the rider id we'll use to track it through the system
     sim.number_riders += 1
 
+    # generate the starting point and destination of the ride
     rider_number = sim.number_riders
-    location = sim.distributions["location"]()
-
-    # generate the destination of the ride
-    destination = sim.distributions["location"]()
+    location, destination = sim.distributions["rider-location"]()
 
     if sim.verbose:
         print(
@@ -167,10 +165,10 @@ def execute_rider_arrival(sim: Simulation):
     arrival_time = sim.current_time + sim.distributions["rider-arrival"]()
     sim.add_event(arrival_time, "rider-arrival")
 
-    if sim.batch_length:
+    if "batch_length" in sim.config:
         if not sim.batching:
                 sim.change_batching_status(True)
-                sim.add_event(sim.current_time + sim.batch_length, 'batch-end')
+                sim.add_event(sim.current_time + sim.config["batch_length"], 'batch-end')
     else:
         if sim.config["allow_reallocation"]:
             reallocate(sim)
@@ -266,10 +264,10 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
         taxi.update_idle_status(idle_status=True)
         taxi.update_location(rider.destination)
 
-        if sim.batch_length:
+        if "batch_length" in sim.config:
             if not sim.batching:
                 sim.change_batching_status(True)
-                sim.add_event(sim.current_time + sim.batch_length, 'batch-end')
+                sim.add_event(sim.current_time + sim.config["batch_length"], 'batch-end')
         else:
             if sim.config["allow_reallocation"]:
                 reallocate(sim)
@@ -277,39 +275,50 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
                 find_rider(sim, taxi)
 
 def execute_batch_end(sim: Simulation):
-    print("handling batch event!")
     ### finds available riders n drivers
     riders = sim.get_waiting_riders()
-    drivers = sim.get_idle_taxis()
+    taxis = sim.get_idle_taxis()
     
     # if one list is empty close batch
-    if riders and drivers:      
-    ## locates these riders n drivers 
+    if riders and taxis:      
+        ## locates these riders n drivers 
         rider_locs = utils.get_locations(riders)
-        driver_locs = utils.get_locations(drivers)
-        dist = cdist(driver_locs[:, :2], rider_locs[:, :2], metric="euclidean")
+        taxi_locs = utils.get_locations(taxis)
+        dist = cdist(taxi_locs[:, :2], rider_locs[:, :2], metric="euclidean")
 
+        ### copy of dist mtx as it will be destroyed
         ### BEGIN HUNGARIAN ALGO
         cost = dist.copy()
+
         # combos of best row and col assignment
         row_ind, col_ind = linear_sum_assignment(cost)
         # driver, rider, distance
-        assigned_pairs = [(driver_locs[r,2], rider_locs[c,2], dist[r,c]) for r,c in zip(row_ind,col_ind)]
-         
+        assigned_pairs = [(taxi_locs[r,2], rider_locs[c,2], dist[r,c]) for r,c in zip(row_ind,col_ind)]
+        
+        ### END HUNGARIAN ALGO
+
         for pair in assigned_pairs:
-            drivers.get(pair[0]).update_idle_status(False)
-            riders.get(pair[1]).update_service_status(service_status='assigned')
+            taxi = taxis.get(pair[0])
+            rider = riders.get(pair[1])
+            
+            taxi.update_idle_status(False)
+            rider.update_service_status(service_status='assigned')
+
+            if sim.verbose:
+                print(
+                    f"taxi {pair[0]} and rider {pair[1]} are paired ({round(pair[2], 2)} away)"
+                )
 
             journey_time = sim.current_time + sim.distributions["journey"](pair[2])
 
             sim.add_event(
-            journey_time,
-            "pickup",
-            event_data={"rider_number": pair[1], "taxi_number": pair[0]},
+                journey_time,
+                "pickup",
+                event_data={"rider_number": pair[1], "taxi_number": pair[0]},
             )
-    else:
-        sim.change_batching_status(False)
-        print("batch end - no action!")  
+
+            # also add the pickup time to the rider
+            rider.pickup_time = journey_time
 
     sim.change_batching_status(False)
     print("batch end!")

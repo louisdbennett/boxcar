@@ -1,27 +1,95 @@
 from boxcar.classes.simulation import Simulation
 from boxcar.classes.generate import Distributions
 from boxcar.classes.handlers import Handlers
-# from boxcar.get_results import save_results
-# from boxcar.get_plots import plot_taxi_path
-# from boxcar.get_plots import get_histos
+from boxcar.get_results import save_results
+from boxcar.get_plots import plot_taxi_path
+from boxcar.get_plots import get_histos
+from boxcar.test_hypothesis import test_all_configs
 
 
 CONFIGS = {
     "rider_choice_rule": ["closest", "shortest", "longest"],
-    "allow_reassign_enroute": [False, True],
-    "reassign_policy": ["closest"],
+    "matching_strategy": [None, 'rerouting', 'batching'],
+    'batch_length': [0.01, 0.05, 0.1, 0.2]
 }
+
 
 def boxcar():
     first = True
-    distributions = Distributions(None)
-    handlers = Handlers(None)
+    for trial in range(200):
+        for cr in CONFIGS['rider_choice_rule']:
+            if cr == 'closest':
+                for ms in CONFIGS['matching_strategy']:
+                    if ms == 'batching': 
+                        for bl in CONFIGS['batch_length']:
+                            cfg = {
+                                'rider_choice_rule': cr,
+                                'matching_strategy': ms,
+                                'batch_length': bl
+                                }
+                            distributions = Distributions(None)
+                            handlers = Handlers(None)
 
-    cfg = {
-        "rider_choice_rule": "closest",
-        "allow_reallocation": True
-    }
+                            sim = Simulation(cfg, distributions, handlers, verbose=True)
+                            distributions.simulation = sim
+                            handlers.simulation = sim
 
+                            sim.run()
+
+                            row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
+                            first = False
+                    else:
+                        cfg = {
+                                'rider_choice_rule': cr,
+                                'matching_strategy': ms,
+                                }
+                        distributions = Distributions(None)
+                        handlers = Handlers(None)
+
+                        sim = Simulation(cfg, distributions, handlers, verbose=True)
+                        distributions.simulation = sim
+                        handlers.simulation = sim
+
+                        sim.run()
+
+                        row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
+                        first = False
+            else: 
+                cfg = {
+                    'rider_choice_rule': cr,
+                    }
+                distributions = Distributions(None)
+                handlers = Handlers(None)
+
+                sim = Simulation(cfg, distributions, handlers, verbose=True)
+                distributions.simulation = sim
+                handlers.simulation = sim
+
+                sim.run()
+
+                row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
+                first = False
+    
+    test_all_configs(
+        csv_path="outputs/results.csv",
+        baseline_cfg="cr=closest, ms=None, bl=None",
+        out_csv="outputs/hypothesis_tests_all_vs_baseline.csv",
+        alpha=0.05
+        )
+
+
+
+    #config = {"rider_choice_rule": "closest", "batch_length":0.1}
+    #distributions = Distributions(None)
+    #handlers = Handlers(None)
+
+    #sim = Simulation(config, distributions, handlers, verbose=True)
+    #distributions.simulation = sim
+    #handlers.simulation = sim
+
+    #sim.run()
+
+    # first = True
     # for trial in range(200):
     #     for rider_choice_rule in CONFIGS["rider_choice_rule"]:
     #             cfg = {
@@ -40,22 +108,14 @@ def boxcar():
                 
     #             sim.run()
     #             row = save_results(sim, cfg, csv_path="outputs/results.csv",run_name=trial, rewrite=first)
-    #             #high_id = row["highest_earning_taxi_id"]
-    #             #low_id  = row["lowest_earning_taxi_id"]
-    #             #plot_taxi_path(sim.taxis[high_id], filename=f"high_{cfg['rider_choice_rule']}.png")
-    #             #plot_taxi_path(sim.taxis[low_id], filename=f"low_{cfg['rider_choice_rule']}.png")
+                #high_id = row["highest_earning_taxi_id"]
+                #low_id  = row["lowest_earning_taxi_id"]
+                #plot_taxi_path(sim.taxis[high_id], filename=f"high_{cfg['rider_choice_rule']}.png")
+                #plot_taxi_path(sim.taxis[low_id], filename=f"low_{cfg['rider_choice_rule']}.png")
 
 
 
-    #             first = False
-
-    sim = Simulation(distributions, handlers, verbose=True, simulation_length=4)
-    sim.config = cfg
-    distributions.simulation = sim
-    handlers.simulation = sim
-                
-                
-    sim.run()
+                # first = False
     # get_histos()
 
 

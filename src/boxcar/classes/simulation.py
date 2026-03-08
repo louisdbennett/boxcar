@@ -6,17 +6,17 @@ from boxcar.classes.rider import Rider
 class Simulation:
     def __init__(
         self, 
+        config: Dict[str, Any] = {"rider_choice_rule": "closest"},
         distributions: Any = None, 
         handlers: Any = None, 
         simulation_length: int = 24,
-        batch_length: float = None,
         verbose: bool= True
     ):
         # fixed values
         self.boundary_length = 20
         self.simulation_length = simulation_length
         self.verbose = verbose
-        self.batch_length = batch_length
+        self.config = config
 
         # type things that can change to throw errors
         self.event_calendar: List[Dict[str, Any]] = []
@@ -31,13 +31,11 @@ class Simulation:
         self.riders: Dict[int, Rider] = {}
         self.current_time: float = 0
 
-        # current config
-        self.config: Dict[str, Any] = {}
-
         if distributions:
-            self.register_distribution("location", distributions.generate_location)
+            self.register_distribution("taxi-location", distributions.generate_taxi_location)
             self.register_distribution("taxi-arrival", distributions.generate_taxi_arrival)
             self.register_distribution("taxi-departure", distributions.generate_taxi_departure)
+            self.register_distribution("rider-location", distributions.generate_rider_location)
             self.register_distribution("rider-arrival", distributions.generate_rider_arrival)
             self.register_distribution("rider-cancellation", distributions.generate_rider_cancelling)
             self.register_distribution("journey", distributions.generate_journey)

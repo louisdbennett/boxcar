@@ -49,10 +49,7 @@ def get_histos(
 ):
     df = pd.read_csv(csv_path)
 
-    skip = {
-        "run_name",
-        "cfg"
-    }
+    skip = {"run_name", "cfg"}
 
     cols = [
         c for c in df.columns
@@ -73,7 +70,7 @@ def get_histos(
             cfg_tag = cfg_tag[:120]
 
         for col in cols:
-            data = sub[[col]]
+            data = sub[[col]].dropna()
             if data.empty:
                 continue
 
