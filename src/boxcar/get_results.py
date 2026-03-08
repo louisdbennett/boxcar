@@ -43,7 +43,7 @@ def save_results(
         t_off = getattr(t, "time_offline")
         t_on = getattr(t, "time_online")
 
-        shift_end = getattr(t, "shift_end")
+        shift_end = getattr(t, "time_offline")
 
         if t_off is not None and t_off > t_on:
             t_end = min(t_off, end_time)

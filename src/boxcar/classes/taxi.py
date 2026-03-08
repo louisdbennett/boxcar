@@ -10,15 +10,13 @@ class Taxi:
         self.going_offline = False
         self.distance_covered = 0
         self.money_made = 0
-        self.time_online = None
+        self.time_online = time
         self.time_offline = None
         self.path: List[Dict[str, Any]] = []
         self._active_segment: Optional[Dict[str, Any]] = None
-        self.shift_end = 0
     
-    def schedule_offline(self, offline_time):
+    def schedule_offline(self):
         self.going_offline = True
-        self.time_online = offline_time
 
     def update_idle_status(self, idle_status=True):
         self.idle = idle_status
