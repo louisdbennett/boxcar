@@ -1,6 +1,7 @@
 from typing import Tuple
 import random
 from numpy.random import multivariate_normal
+from numpy import all
 
 class Distributions:
     def __init__(self, simulation):
@@ -25,8 +26,11 @@ class Distributions:
         mu=[9.973919, 11.513314],
         Sigma=[[20.372409, -1.315436], [-1.315436, 20.123543]],
     ) -> Tuple[float, float]:
-        samp = multivariate_normal(mu, Sigma, 1)[0].tolist()
-        return (samp[0],samp[1])
+        # have to do rejection sampling to make sure people are coming online within the city
+        while True:
+            samp = multivariate_normal(mu, Sigma, 1)[0]
+            if all((samp >= 0) & (samp <= self.simulation.boundary_length)):
+                return (samp[0],samp[1])
 
     def generate_rider_location(
         self,
@@ -38,8 +42,10 @@ class Distributions:
             [-7.9774297, 3.0090637, -0.2035568, 24.7523207],
         ],
     ) -> Tuple[Tuple[float, float], Tuple[float, float]]:
-        samp = multivariate_normal(mu, Sigma, 1)[0].tolist()
-        return (samp[0], samp[1]), (samp[2], samp[3])
+        while True:
+            samp = multivariate_normal(mu, Sigma, 1)[0]
+            if all((samp >= 0) & (samp <= self.simulation.boundary_length)):
+                return (samp[0], samp[1]), (samp[2], samp[3])
 
     # possibly a way to combine generate_taxi_arrival and generate_rider_arrival
     def generate_rider_arrival(self, alpha=64420, beta=1/1994.91) -> float:
@@ -47,7 +53,7 @@ class Distributions:
         arrival_time = random.expovariate(rate)  
         return arrival_time
 
-    def generate_rider_cancelling(self, rate=5) -> float:
+    def generate_rider_cancelling(self, rate=0.1) -> float:
         cancellation_time = random.expovariate(rate)
         return cancellation_time
 
