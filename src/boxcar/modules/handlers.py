@@ -270,8 +270,11 @@ def execute_batch_end(sim: Simulation):
         ### END HUNGARIAN ALGO
 
         for pair in assigned_pairs:
-            taxis.get(pair[0]).update_idle_status(False)
-            riders.get(pair[1]).update_service_status(service_status=True)
+            taxi = taxis.get(pair[0])
+            rider = riders.get(pair[1])
+            
+            taxi.update_idle_status(False)
+            rider.update_service_status(service_status=True)
 
             if sim.verbose:
                 print(
@@ -285,6 +288,9 @@ def execute_batch_end(sim: Simulation):
                 "pickup",
                 event_data={"rider_number": pair[1], "taxi_number": pair[0]},
             )
+
+            # also add the pickup time to the rider
+            rider.pickup_time = journey_time
 
     sim.change_batching_status(False)
 
