@@ -6,13 +6,11 @@ class Rider:
         self.location = location
         self.destination = destination
         self.cancelled = False
-        self.in_service = False
+        self.in_service = 'waiting'
         self.at_destination = False
         self.online_time = time
         self.pickup_time = False
-        self.taxi_en_route = False
-        self.in_taxi = False
-        self.assigned_driver = None
+        self.taxi_id = None
 
     def update_location(self, location):
         self.location = location
@@ -20,7 +18,7 @@ class Rider:
     def cancel_ride(self):
         self.cancelled = True
 
-    def update_service_status(self, service_status=True):
+    def update_service_status(self, service_status='waiting'):
         self.in_service = service_status
     
     def reach_destination(self):

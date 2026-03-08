@@ -3,7 +3,6 @@ from bisect import bisect_right
 from boxcar.classes.taxi import Taxi
 from boxcar.classes.rider import Rider
 
-
 class Simulation:
     def __init__(
         self, 
@@ -114,8 +113,14 @@ class Simulation:
     def get_idle_taxis(self) -> Dict[int, Taxi]:
         return {num: taxi for num, taxi in self.taxis.items() if taxi.idle and taxi.online}
 
-    def get_waiting_riders(self) -> Dict[int, Rider]:
-        return {num: rider for num, rider in self.riders.items() if (not rider.in_service and not rider.cancelled and not rider.at_destination)}
+    def get_waiting_riders(self, status = 'waiting') -> Dict[int, Rider]:
+        return {num: rider for num, rider in self.riders.items() if (rider.in_service in status and not rider.cancelled and not rider.at_destination)}
 
     def change_batching_status(self, status:bool) -> None:
         self.batching = status
+
+    def get_enroute_taxis(self) -> Dict[int, Taxi]:
+        return {num: taxi for num, taxi in self.taxis.items() if taxi.en_route and taxi.online}
+    
+    def get_enroute_or_idle_taxis(self) -> Dict[int, Taxi]:
+        return {num: taxi for num, taxi in self.taxis.items() if (taxi.en_route or taxi.idle) and taxi.online}
