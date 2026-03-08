@@ -6,7 +6,7 @@ from boxcar.classes.rider import Rider
 class Simulation:
     def __init__(
         self, 
-        config: Dict[str, Any] = {"rider_choice_rule": "closest"},
+        config: Dict[str, Any],
         distributions: Any = None, 
         handlers: Any = None, 
         simulation_length: int = 24,
