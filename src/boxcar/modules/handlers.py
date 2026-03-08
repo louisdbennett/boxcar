@@ -110,7 +110,6 @@ def execute_taxi_arrival(sim: Simulation):
     location = sim.distributions["taxi-location"]()
 
     taxi_number = sim.number_taxis
-
     if sim.verbose:
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} arrives")
 
@@ -124,6 +123,9 @@ def execute_taxi_arrival(sim: Simulation):
 
     arrival_time = sim.current_time + sim.distributions["taxi-arrival"]()
     sim.add_event(arrival_time, "taxi-arrival")
+    taxi = sim.taxis[taxi_number]
+    taxi.shift_end = departure_time
+    taxi.time_online = sim.current_time
 
 def execute_taxi_departure(sim: Simulation, taxi_number):
     if sim.verbose:
@@ -136,7 +138,7 @@ def execute_taxi_departure(sim: Simulation, taxi_number):
     if taxi.idle:
         taxi.go_offline(sim.current_time)
     else:
-        taxi.schedule_offline()
+        taxi.schedule_offline(sim.current_time)
 
 def execute_rider_arrival(sim: Simulation):
     # get the rider id we'll use to track it through the system

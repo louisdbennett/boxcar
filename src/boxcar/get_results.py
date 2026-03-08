@@ -28,11 +28,43 @@ def save_results(
 
     per_hour = []
     for t in taxis:
-        hrs = t.time_offline - t.time_online
-        if hrs is None or hrs <= 0:
-            continue
+        if t.time_offline == None:
+            t_end = sim.simulation_length
+            hrs = t_end - t.time_online
+        elif t.time_offline: 
+            hrs = t.time_offline - t.time_online
         per_hour.append((t, t.money_made / hrs))
 
+
+    end_time = sim.simulation_length  # hours
+
+    free_times = []
+    for t in taxis:
+        t_off = getattr(t, "time_offline")
+        t_on = getattr(t, "time_online")
+
+        shift_end = getattr(t, "shift_end")
+
+        if t_off is not None and t_off > t_on:
+            t_end = min(t_off, end_time)
+        elif shift_end is not None and shift_end > t_on:
+            t_end = min(shift_end, end_time)
+        else:
+            t_end = end_time
+
+        online = t_end - t_on
+        if online <= 0:
+            continue
+
+        busy = sum(
+            (seg["t_end"] - seg["t_start"])
+            for seg in getattr(t, "path", [])
+            if seg.get("t_start") is not None and seg.get("t_end") is not None
+        )
+
+        free_times.append( online - busy)
+
+    avg_free_time = sum(free_times) / len(free_times)
 
     high_taxi, high_rate = max(per_hour, key=lambda x: x[1])
     low_taxi, low_rate = min(per_hour, key=lambda x: x[1])
@@ -48,6 +80,7 @@ def save_results(
         "Customers served": served,
         "Customers cancelled": cancelled,
         "Waiting time": waiting_total,
+        'Average free time': avg_free_time,
         "Highest earning taxi id": highest_id,
         "Highest earning taxi per hour": highest_norm,
         "Lowest earning taxi id": lowest_id,
