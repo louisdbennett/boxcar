@@ -41,7 +41,7 @@ def test_all_configs(
                 "conclusion": "Different Distribution" if reject_null else "Same Distribution",
                 "baseline_mean": np.mean(x),
                 "test_mean": np.mean(y),
-                "diff_percent": ((np.mean(y) - np.mean(x)) / np.mean(x)) * 100 if np.mean(x) != 0 else 0
+                "diff_percent": ((np.mean(y) - np.mean(x)) / np.mean(x)) * 100
             })
 
     out = pd.DataFrame(rows)
