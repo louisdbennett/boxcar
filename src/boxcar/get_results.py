@@ -41,7 +41,7 @@ def save_results(
 
     row: Dict[str, Any] = {
         "run_name": run_name,
-        "cfg": str(cfg['rider_choice_rule']),
+        "cfg": f"cr={cfg.get('rider_choice_rule')}, ms={cfg.get('matching_strategy')}, bl={cfg.get('batch_length', cfg.get('batch_length'))}",
         "Total money_made": total_money,
         "Total distance driven": total_distance,
         "Average profit": profit_avg,

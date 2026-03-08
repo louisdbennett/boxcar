@@ -12,8 +12,9 @@ CONFIGS = {
     'batch_length': [0.01, 0.05, 0.1, 0.2]
 }
 
-first = True
+
 def boxcar():
+    first = True
     for cr in CONFIGS['rider_choice_rule']:
         if cr == 'closest':
             for ms in CONFIGS['matching_strategy']:
@@ -50,6 +51,7 @@ def boxcar():
                     sim.run()
 
                     row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
+                    first = False
         else: 
             cfg = {
                 'rider_choice_rule': cr,
@@ -64,6 +66,7 @@ def boxcar():
             sim.run()
 
             row = save_results(sim, cfg, csv_path="outputs/results.csv", rewrite=first)
+            first = False
 
 
     #config = {"rider_choice_rule": "closest", "batch_length":0.1}
