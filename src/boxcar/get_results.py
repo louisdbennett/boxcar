@@ -25,13 +25,11 @@ def save_results(
     online_time = (rider.online_time for rider in sim.riders.values() if rider.pickup_time)
     pickup_time = (rider.pickup_time for rider in sim.riders.values() if rider.pickup_time)
     waiting_total = sum(pickup - online for online, pickup in zip(online_time, pickup_time))
-
     per_hour = []
     for t in taxis:
-        if t.time_offline == None:
-            t_end = sim.simulation_length
-            hrs = t_end - t.time_online
-        elif t.time_offline: 
+        if t.time_offline is None:
+            hrs = sim.simulation_length - t.time_online
+        elif t.time_offline:
             hrs = t.time_offline - t.time_online
         per_hour.append((t, t.money_made / hrs))
 
@@ -43,18 +41,13 @@ def save_results(
         t_off = getattr(t, "time_offline")
         t_on = getattr(t, "time_online")
 
-        shift_end = getattr(t, "time_offline")
-
         if t_off is not None and t_off > t_on:
             t_end = min(t_off, end_time)
-        elif shift_end is not None and shift_end > t_on:
-            t_end = min(shift_end, end_time)
         else:
             t_end = end_time
 
         online = t_end - t_on
-        if online <= 0:
-            continue
+
 
         busy = sum(
             (seg["t_end"] - seg["t_start"])
@@ -62,14 +55,21 @@ def save_results(
             if seg.get("t_start") is not None and seg.get("t_end") is not None
         )
 
-        free_times.append( online - busy)
+        free_times.append(online - busy)
 
-    avg_free_time = sum(free_times) / len(free_times)
+    avg_free_time = sum(free_times) / len(free_times) if free_times else 0
 
     high_taxi, high_rate = max(per_hour, key=lambda x: x[1])
-    low_taxi, low_rate = min(per_hour, key=lambda x: x[1])
+
+    positive_per_hour = [(t, rate) for t, rate in per_hour if t.money_made > 0]
+
+    if positive_per_hour:
+        low_taxi, low_rate = min(positive_per_hour, key=lambda x: x[1])
+        lowest_id, lowest_norm = low_taxi.number, low_rate
+    else:
+        lowest_id, lowest_norm = None, None
+
     highest_id, highest_norm = high_taxi.number, high_rate
-    lowest_id, lowest_norm = low_taxi.number, low_rate
 
     row: Dict[str, Any] = {
         "run_name": run_name,
