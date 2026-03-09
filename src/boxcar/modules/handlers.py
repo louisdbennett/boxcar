@@ -346,8 +346,6 @@ def reallocate(sim: Simulation):
         Assig_drivers = sim.get_enroute_taxis()
         Existing_pairs = utils.get_assigned_passengers(Assig_drivers)
                
-
-        rider_locs = utils.get_locations(All_riders)
         # print(f'rider locs = {rider_locs}')
         driver_locs = utils.get_moving_locations(All_drivers, sim.current_time)
         
@@ -409,14 +407,18 @@ def reallocate(sim: Simulation):
         for pair in assigned_pairs:
             # drivers: set idle to false and en route to true
             driver = All_drivers.get(pair[0])
-            
+            rider = All_riders.get(pair[1])
+
+            moved_start = tuple(driver_locs[driver_locs[:, 2] == pair[0]][0, :2])
+
             driver.update_idle_status(False)
             driver.start_en_route(True)
             driver.set_origin_time(sim.current_time)
+            driver.set_origin_location(moved_start)
+            driver.update_location(moved_start)  # keep taxi location consistent with current moving position
 
             journey_time = sim.current_time + sim.distributions["journey"](pair[2])
             
-            rider = All_riders.get(pair[1])
             rider.update_service_status(service_status='assigned')
             rider.pickup_time = journey_time
             # set_new_start_and_end(self,current_time, dest_time, orig_loc, dest_loc,rider_no)                
@@ -426,6 +428,12 @@ def reallocate(sim: Simulation):
             # only schedule if the driver is not currently picking up the rider
             if driver.passenger_id != pair[1]:
                 print(f"assigning taxi {pair[0]} to rider {pair[1]}")
+
+                # close the currently active empty segment before rerouting
+                if getattr(driver, "path", None):
+                    last_seg = driver.path[-1]
+                    if last_seg.get("t_end") is None and not last_seg.get("has_rider", False):
+                        driver.end_segment(t_end=sim.current_time)
 
                 sim.add_event(
                     journey_time,
@@ -437,9 +445,15 @@ def reallocate(sim: Simulation):
                 driver.set_destination_location(All_riders.get(pair[1]).location)
                 driver.add_rider(pair[1])
 
+                # start a new empty segment from the current moved location to the reassigned rider
+                driver.start_segment(
+                    t_start=sim.current_time,
+                    start=moved_start,
+                    end=rider.location,
+                    has_rider=False
+                )
+
             ## adding time to journey up to this point
-            moved_start = driver_locs[driver_locs[:, 2] == pair[0]][0, :2]
-            
             taxi_start_to_here = (
                 (moved_start[0] - rider.location[0])**2 +
                 (moved_start[1] - rider.location[1])**2
