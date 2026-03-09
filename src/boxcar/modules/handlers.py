@@ -124,6 +124,16 @@ def execute_taxi_arrival(sim: Simulation):
 
     arrival_time = sim.current_time + sim.distributions["taxi-arrival"]()
     sim.add_event(arrival_time, "taxi-arrival")
+    taxi = sim.taxis[taxi_number]
+
+    if "batch_length" in sim.config:
+        # batching can wait for batch-end
+        pass
+    else:
+        if sim.config["rider_choice_rule"] == "closest" and sim.config.get("matching_strategy") == "allow_rellocation":
+            reallocate(sim)
+        else:
+            find_rider(sim, taxi)
 
 def execute_taxi_departure(sim: Simulation, taxi_number):
     if sim.verbose:
@@ -430,7 +440,10 @@ def reallocate(sim: Simulation):
             ## adding time to journey up to this point
             moved_start = driver_locs[driver_locs[:, 2] == pair[0]][0, :2]
             
-            taxi_start_to_here = ((moved_start[0]- rider.location[0])**2 +(moved_start[1]- rider.location[0])**2)**0.5
+            taxi_start_to_here = (
+                (moved_start[0] - rider.location[0])**2 +
+                (moved_start[1] - rider.location[1])**2
+                )**0.5
 
             if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation': 
                 driver.distance_covered += taxi_start_to_here
