@@ -9,7 +9,7 @@ from boxcar.test_hypothesis import test_all_configs
 
 CONFIGS = {
     "rider_choice_rule": ["closest", "shortest", "longest"],
-    "matching_strategy": [None, 'allow_rellocation', 'batching'],
+    "matching_strategy": [None, 'allow_relocation', 'batching'],
     'batch_length': [0.01, 0.05, 0.1, 0.2]
 }
 

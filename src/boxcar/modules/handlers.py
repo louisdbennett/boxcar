@@ -139,7 +139,7 @@ def execute_taxi_arrival(sim: Simulation):
     else:
         if (
             sim.config["rider_choice_rule"] == "closest"
-            and sim.config.get("matching_strategy") == "allow_rellocation"
+            and sim.config.get("matching_strategy") == "allow_relocation"
         ):
             reallocate(sim)
         else:
@@ -195,7 +195,7 @@ def execute_rider_arrival(sim: Simulation):
     else:
         if (
             sim.config["rider_choice_rule"] == "closest"
-            and sim.config["matching_strategy"] == "allow_rellocation"
+            and sim.config["matching_strategy"] == "allow_relocation"
         ):
             reallocate(sim)
         else:
@@ -315,7 +315,7 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
         else:
             if (
                 sim.config["rider_choice_rule"] == "closest"
-                and sim.config["matching_strategy"] == "allow_rellocation"
+                and sim.config["matching_strategy"] == "allow_relocation"
             ):
                 reallocate(sim)
             else:
