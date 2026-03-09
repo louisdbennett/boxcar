@@ -6,18 +6,18 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
 
-def find_rider(sim: Simulation, taxi:Taxi):
+def find_rider(sim: Simulation, taxi: Taxi):
     location = taxi.location
     taxi_number = taxi.number
 
     # picking up closest idle passengers if any exist
     riders = sim.get_waiting_riders()
     trips = utils.get_trips(riders)
-    
+
     if riders:
         if sim.config["rider_choice_rule"] == "closest":
             rider_number, dist = utils.find_closest(location, utils.get_locations(riders))
-            
+
         elif sim.config["rider_choice_rule"] == "shortest":
             rider_number, trip_dist = utils.find_shortest_trip(trips)
 
@@ -36,56 +36,16 @@ def find_rider(sim: Simulation, taxi:Taxi):
             print(
                 f"{round(sim.current_time, 2)} rider {rider_number} is chosen and taxi {taxi_number} assigned ({round(dist, 2)} away)"
             )
-            
+
         # update the rider to be in service so they don't go offline
         rider = riders[rider_number]
-        rider.update_service_status(service_status='assigned')
-        
-
-        # track the total distance the taxi has/will cover
-        taxi.distance_covered += dist
+        rider.update_service_status(service_status="assigned")
 
         # update the taxi to not be in an idle state
         taxi.update_idle_status(False)
 
-        # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
-        journey_time = sim.current_time + sim.distributions["journey"](dist)
-        taxi.start_segment(
-            t_start=sim.current_time,
-            start=taxi.location,
-            end=rider.location,
-            has_rider=False
-        )
-        sim.add_event(
-            journey_time,
-            "pickup",
-            event_data={"rider_number": rider_number, "taxi_number": taxi_number}
-        )
-
-        # also add the pickup time to the rider
-        rider.pickup_time = journey_time
-
-def find_taxi(sim: Simulation, rider:Rider):
-    location = rider.location
-    rider_number = rider.number
-
-    # check all online taxis and assign the closest
-    taxis = sim.get_idle_taxis()
-    if taxis:
-        # checking for configs
-        taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
-        taxi = taxis[taxi_number]
-        if sim.verbose:
-            print(
-                f"taxi {taxi_number} is the closest out of {len(taxis)} ({round(dist, 2)} away) and is assigned"
-            )
-
-        # update the rider to be in service so they don't go offline
-        rider = sim.riders[rider_number]
-        rider.update_service_status(service_status='assigned')
-
-        # update the taxi to no longer be idle
-        taxi.update_idle_status(idle_status=False)
+        # store current assignment for all configs
+        taxi.passenger_id = rider_number
 
         # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
         journey_time = sim.current_time + sim.distributions["journey"](dist)
@@ -93,7 +53,7 @@ def find_taxi(sim: Simulation, rider:Rider):
             t_start=sim.current_time,
             start=taxi.location,
             end=rider.location,
-            has_rider=False
+            has_rider=False,
         )
         sim.add_event(
             journey_time,
@@ -104,19 +64,66 @@ def find_taxi(sim: Simulation, rider:Rider):
         # also add the pickup time to the rider
         rider.pickup_time = journey_time
 
+
+def find_taxi(sim: Simulation, rider: Rider):
+    location = rider.location
+    rider_number = rider.number
+
+    # check all online taxis and assign the closest
+    taxis = sim.get_idle_taxis()
+    if taxis:
+        taxi_number, dist = utils.find_closest(location, utils.get_locations(taxis))
+        taxi = taxis[taxi_number]
+        if sim.verbose:
+            print(
+                f"taxi {taxi_number} is the closest out of {len(taxis)} ({round(dist, 2)} away) and is assigned"
+            )
+
+        # update the rider to be in service so they don't go offline
+        rider = sim.riders[rider_number]
+        rider.update_service_status(service_status="assigned")
+
+        # update the taxi to no longer be idle
+        taxi.update_idle_status(idle_status=False)
+
+        # store current assignment for all configs
+        taxi.passenger_id = rider_number
+
+        # schedule arrival of taxi to pick up passenger depending on the distance and add to EC
+        journey_time = sim.current_time + sim.distributions["journey"](dist)
+        taxi.start_segment(
+            t_start=sim.current_time,
+            start=taxi.location,
+            end=rider.location,
+            has_rider=False,
+        )
+        sim.add_event(
+            journey_time,
+            "pickup",
+            event_data={"rider_number": rider_number, "taxi_number": taxi_number},
+        )
+
+        # also add the pickup time to the rider
+        rider.pickup_time = journey_time
+
+
 def execute_taxi_arrival(sim: Simulation):
     # get the taxi id we'll use to track it through the system
     sim.number_taxis += 1
+
     # generate the starting location of the taxi and get its id
     location = sim.distributions["taxi-location"]()
 
     taxi_number = sim.number_taxis
     if sim.verbose:
-        print(f"{round(sim.current_time, 2)}: taxi {taxi_number} arrives at ({round(location[0], 1)},{round(location[1], 1)})")
+        print(
+            f"{round(sim.current_time, 2)}: taxi {taxi_number} arrives at ({round(location[0], 1)},{round(location[1], 1)})"
+        )
 
     # add the taxi to the simulation
     sim.taxis[taxi_number] = Taxi(taxi_number, location, sim.current_time)
     departure_time = sim.current_time + sim.distributions["taxi-departure"]()
+
     # pass taxi number through to departure event so we can remove the correct taxi
     sim.add_event(
         departure_time, "taxi-departure", event_data={"taxi_number": taxi_number}
@@ -130,15 +137,19 @@ def execute_taxi_arrival(sim: Simulation):
         # batching can wait for batch-end
         pass
     else:
-        if sim.config["rider_choice_rule"] == "closest" and sim.config.get("matching_strategy") == "allow_rellocation":
+        if (
+            sim.config["rider_choice_rule"] == "closest"
+            and sim.config.get("matching_strategy") == "allow_rellocation"
+        ):
             reallocate(sim)
         else:
             find_rider(sim, taxi)
 
+
 def execute_taxi_departure(sim: Simulation, taxi_number):
     if sim.verbose:
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} departs")
-    
+
     taxi = sim.taxis.get(taxi_number)
 
     # if the taxi is currently idle then remove it
@@ -147,6 +158,7 @@ def execute_taxi_departure(sim: Simulation, taxi_number):
         taxi.go_offline(sim.current_time)
     else:
         taxi.schedule_offline()
+
 
 def execute_rider_arrival(sim: Simulation):
     # get the rider id we'll use to track it through the system
@@ -169,7 +181,7 @@ def execute_rider_arrival(sim: Simulation):
     sim.add_event(
         cancellation_time,
         "rider-cancellation",
-        event_data={"rider_number": rider_number}
+        event_data={"rider_number": rider_number},
     )
 
     # schedule the next rider to arrives
@@ -178,13 +190,17 @@ def execute_rider_arrival(sim: Simulation):
 
     if "batch_length" in sim.config:
         if not sim.batching:
-                sim.change_batching_status(True)
-                sim.add_event(sim.current_time + sim.config["batch_length"], 'batch-end')
+            sim.change_batching_status(True)
+            sim.add_event(sim.current_time + sim.config["batch_length"], "batch-end")
     else:
-        if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation':
+        if (
+            sim.config["rider_choice_rule"] == "closest"
+            and sim.config["matching_strategy"] == "allow_rellocation"
+        ):
             reallocate(sim)
         else:
             find_taxi(sim, rider)
+
 
 def execute_rider_cancellation(sim: Simulation, rider_number):
     rider = sim.riders.get(rider_number)
@@ -195,57 +211,73 @@ def execute_rider_cancellation(sim: Simulation, rider_number):
             print(f"{round(sim.current_time, 2)}: rider {rider_number} cancels and departs")
         rider.cancel_ride()
 
+
 def execute_rider_pickup(sim: Simulation, rider_number, taxi_number):
     if sim.verbose:
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} picking up rider {rider_number}")
 
     rider = sim.riders.get(rider_number)
     taxi = sim.taxis.get(taxi_number)
-    
-    if rider_number == sim.taxis.get(taxi_number).passenger_id or sim.taxis.get(taxi_number).passenger_id == None:
-        # pickup the rider
-        rider.update_service_status('in_taxi')
 
-        dist = ((rider.location[0] - rider.destination[0]) ** 2 + (rider.location[1] - rider.destination[1]) ** 2) ** (1/2)
-        
-        taxi.start_en_route(False)
-        # could change these to being after the trip? 
-        # was more convenient here because we have the distance
-        # add the distance of the journey to the taxis total distance
-        dist_taxi_to_rider = ((rider.location[0] - taxi.origin_loc[0]) ** 2 + (rider.location[1] - taxi.origin_loc[1]) ** 2) ** (1/2)
-        
-        taxi.distance_covered += dist
-        # separate metric for rerouting distance
+    if rider is None or taxi is None:
+        return
 
-        if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation': 
-            taxi.distance_covered += dist_taxi_to_rider
+    # only the currently assigned rider may be picked up
+    # this blocks stale pickup events after relocation
+    if taxi.passenger_id != rider_number:
+        return
 
-        # ignore below two
-        taxi.distance_covered_reassign += dist
-        taxi.distance_covered_reassign += dist_taxi_to_rider
+    # ignore stale pickup if rider already cancelled/completed
+    if rider.at_destination or rider.in_service not in ["assigned", "waiting"]:
+        return
 
-        # add the price of the trip
-        price = 3 + dist * 2
-        taxi.money_made += price
+    # pickup the rider
+    rider.update_service_status("in_taxi")
 
-        journey_time = sim.current_time + sim.distributions["journey"](dist)
+    trip_dist = (
+        (rider.location[0] - rider.destination[0]) ** 2
+        + (rider.location[1] - rider.destination[1]) ** 2
+    ) ** (1 / 2)
 
-        taxi.end_segment(t_end=sim.current_time)
+    taxi.start_en_route(False)
 
-        taxi.update_location(rider.location)
+    # actual empty distance driven to reach rider
+    dist_taxi_to_rider = (
+        (rider.location[0] - taxi.origin_loc[0]) ** 2
+        + (rider.location[1] - taxi.origin_loc[1]) ** 2
+    ) ** (1 / 2)
 
-        taxi.start_segment(
-            t_start=sim.current_time,
-            start=rider.location,
-            end=rider.destination,
-            has_rider=True
-        )
+    # count distance exactly once here
+    taxi.distance_covered += dist_taxi_to_rider
+    taxi.distance_covered += trip_dist
 
-        sim.add_event(
-            journey_time,
-            "dropoff",
-            event_data={"rider_number": rider_number, "taxi_number": taxi_number},
-        )
+    # keep separate diagnostic metric if you want
+    taxi.distance_covered_reassign += trip_dist
+    taxi.distance_covered_reassign += dist_taxi_to_rider
+
+    # add the price of the trip
+    price = 3 + trip_dist * 2
+    taxi.money_made += price
+
+    journey_time = sim.current_time + sim.distributions["journey"](trip_dist)
+
+    taxi.end_segment(t_end=sim.current_time)
+
+    taxi.update_location(rider.location)
+
+    taxi.start_segment(
+        t_start=sim.current_time,
+        start=rider.location,
+        end=rider.destination,
+        has_rider=True,
+    )
+
+    sim.add_event(
+        journey_time,
+        "dropoff",
+        event_data={"rider_number": rider_number, "taxi_number": taxi_number},
+    )
+
 
 def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
     if sim.verbose:
@@ -256,15 +288,15 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
     # update the rider to be at their destination
     rider = sim.riders.get(rider_number)
     rider.reach_destination()
-    
+
     # remove the rider
     taxi.remove_rider()
+    taxi.passenger_id = None
     taxi.start_en_route(False)
     taxi.set_origin_location(rider.destination)
     taxi.set_destination_location(rider.destination)
     taxi.set_origin_time(sim.current_time)
     taxi.set_destination_time(sim.current_time)
-
 
     taxi.end_segment(t_end=sim.current_time)
 
@@ -279,22 +311,25 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
         if "batch_length" in sim.config:
             if not sim.batching:
                 sim.change_batching_status(True)
-                sim.add_event(sim.current_time + sim.config["batch_length"], 'batch-end')
+                sim.add_event(sim.current_time + sim.config["batch_length"], "batch-end")
         else:
-
-            if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation':
+            if (
+                sim.config["rider_choice_rule"] == "closest"
+                and sim.config["matching_strategy"] == "allow_rellocation"
+            ):
                 reallocate(sim)
             else:
                 find_rider(sim, taxi)
+
 
 def execute_batch_end(sim: Simulation):
     ### finds available riders n drivers
     riders = sim.get_waiting_riders()
     taxis = sim.get_idle_taxis()
-    
+
     # if one list is empty close batch
-    if riders and taxis:      
-        ## locates these riders n drivers 
+    if riders and taxis:
+        ## locates these riders n drivers
         rider_locs = utils.get_locations(riders)
         taxi_locs = utils.get_locations(taxis)
         dist = cdist(taxi_locs[:, :2], rider_locs[:, :2], metric="euclidean")
@@ -306,16 +341,19 @@ def execute_batch_end(sim: Simulation):
         # combos of best row and col assignment
         row_ind, col_ind = linear_sum_assignment(cost)
         # driver, rider, distance
-        assigned_pairs = [(taxi_locs[r,2], rider_locs[c,2], dist[r,c]) for r,c in zip(row_ind,col_ind)]
-        
+        assigned_pairs = [
+            (taxi_locs[r, 2], rider_locs[c, 2], dist[r, c])
+            for r, c in zip(row_ind, col_ind)
+        ]
+
         ### END HUNGARIAN ALGO
 
         for pair in assigned_pairs:
             taxi = taxis.get(pair[0])
             rider = riders.get(pair[1])
-            
+
             taxi.update_idle_status(False)
-            rider.update_service_status(service_status='assigned')
+            rider.update_service_status(service_status="assigned")
 
             if sim.verbose:
                 print(
@@ -323,6 +361,16 @@ def execute_batch_end(sim: Simulation):
                 )
 
             journey_time = sim.current_time + sim.distributions["journey"](pair[2])
+
+            # set assignment here too
+            taxi.passenger_id = pair[1]
+
+            taxi.start_segment(
+                t_start=sim.current_time,
+                start=taxi.location,
+                end=rider.location,
+                has_rider=False,
+            )
 
             sim.add_event(
                 journey_time,
@@ -336,47 +384,39 @@ def execute_batch_end(sim: Simulation):
     sim.change_batching_status(False)
     print("batch end!")
 
+
 def reallocate(sim: Simulation):
-    All_riders = sim.get_waiting_riders(['waiting', 'assigned'])
+    All_riders = sim.get_waiting_riders(["waiting", "assigned"])
     All_drivers = sim.get_enroute_or_idle_taxis()
 
     if All_riders and All_drivers:
-        print('begin reallocate!!')
+        print("begin reallocate!!")
 
         Assig_drivers = sim.get_enroute_taxis()
         Existing_pairs = utils.get_assigned_passengers(Assig_drivers)
-               
-        # print(f'rider locs = {rider_locs}')
+
         driver_locs = utils.get_moving_locations(All_drivers, sim.current_time)
-        
-        # print(f'driver locs = {driver_locs}')
-        # establish distance matrix 
-        # print(f'the distance is {dist}')
         rider_locs = utils.get_locations(All_riders)
         dist = cdist(driver_locs[:, :2], rider_locs[:, :2], metric="euclidean")
-        ##
         cost = dist.copy()
 
         # convert existing assignments to indices
-        #x, y = driver_locs[driver_locs[:, 2] == target_num][0, :2]
-
         if len(Existing_pairs) != 0:
-            # print(f'Existing pairings = {Existing_pairs}') 
-
-            d_arr = np.array(driver_locs)
-            r_arr = np.array(rider_locs)
-            
             pair_ids = {p[0] for p in Existing_pairs}
-            paired_driver_idx = [i for i, (_, _, id_) in enumerate(driver_locs) if id_ in pair_ids]
+            paired_driver_idx = [
+                i for i, (_, _, id_) in enumerate(driver_locs) if id_ in pair_ids
+            ]
 
             pair_ids = {p[1] for p in Existing_pairs}
-            paired_rider_idx = [i for i, (_, _, id_) in enumerate(rider_locs) if id_ in pair_ids]
+            paired_rider_idx = [
+                i for i, (_, _, id_) in enumerate(rider_locs) if id_ in pair_ids
+            ]
 
             existing_idx = list(zip(paired_driver_idx, paired_rider_idx))
-            # print(f'the existing index {existing_idx}')
 
             for d_i, r_i in existing_idx:
                 current_cost = dist[d_i, r_i]
+
                 # driver constraint (row)
                 worse_for_driver = dist[d_i, :] >= current_cost
                 cost[d_i, worse_for_driver] = np.inf
@@ -388,21 +428,11 @@ def reallocate(sim: Simulation):
                 # keep original assignment feasible
                 cost[d_i, r_i] = current_cost
 
-            # print(f'dist matrix ={dist}')
-            # print(f'cost matrix = {cost}')
-
         row_ind, col_ind = linear_sum_assignment(cost)
-        assigned_pairs = [(driver_locs[r,2], rider_locs[c,2], dist[r,c]) for r,c in zip(row_ind,col_ind)] 
-        
-        # if len(Existing_pairs) != 0:
-        #     for i in assigned_pairs_no_dist:
-        #         #if i in Existing_pairs:
-        #         print(f'i in pairs {i}')
-        #         if i in Existing_pairs:
-        #             print('yes')
-        #     print(f'Existing paris {Existing_pairs} vs assigned pairs {assigned_pairs}')
-
-        ### return only the pairs that are made new
+        assigned_pairs = [
+            (driver_locs[r, 2], rider_locs[c, 2], dist[r, c])
+            for r, c in zip(row_ind, col_ind)
+        ]
 
         # tidying up and setting all to correct status
         for pair in assigned_pairs:
@@ -419,12 +449,9 @@ def reallocate(sim: Simulation):
             driver.update_location(moved_start)  # keep taxi location consistent with current moving position
 
             journey_time = sim.current_time + sim.distributions["journey"](pair[2])
-            
-            rider.update_service_status(service_status='assigned')
+
+            rider.update_service_status(service_status="assigned")
             rider.pickup_time = journey_time
-            # set_new_start_and_end(self,current_time, dest_time, orig_loc, dest_loc,rider_no)                
-            
-            # print(sim.event_calendar)
 
             # only schedule if the driver is not currently picking up the rider
             if driver.passenger_id != pair[1]:
@@ -436,12 +463,15 @@ def reallocate(sim: Simulation):
                     if last_seg.get("t_end") is None and not last_seg.get("has_rider", False):
                         driver.end_segment(t_end=sim.current_time)
 
+                driver.passenger_id = pair[1]
+                driver.status = "enroute"
+
                 sim.add_event(
                     journey_time,
                     "pickup",
                     event_data={"rider_number": pair[1], "taxi_number": pair[0]},
                 )
-                
+
                 driver.set_destination_time(journey_time)
                 driver.set_destination_location(All_riders.get(pair[1]).location)
                 driver.add_rider(pair[1])
@@ -451,30 +481,12 @@ def reallocate(sim: Simulation):
                     t_start=sim.current_time,
                     start=moved_start,
                     end=rider.location,
-                    has_rider=False
+                    has_rider=False,
                 )
 
-            ## adding time to journey up to this point
-            taxi_start_to_here = (
-                (moved_start[0] - rider.location[0])**2 +
-                (moved_start[1] - rider.location[1])**2
-                )**0.5
-
-            if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation': 
-                driver.distance_covered += taxi_start_to_here
-            # ignore this one
-            driver.distance_covered_reassign += taxi_start_to_here
-            # this one ok
             driver.set_origin_location(moved_start)
-
-            #set from loc, to loc, from when, to when, passenger in taxi
-            
-
-            ## setting rider to in service and driver en route
-            
-
 
 
 def execute_termination(sim: Simulation):
     if sim.verbose:
-        print(f'{round(sim.current_time, 2)}: terminating simulation')
+        print(f"{round(sim.current_time, 2)}: terminating simulation")
