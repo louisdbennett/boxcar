@@ -201,7 +201,7 @@ def execute_rider_pickup(sim: Simulation, rider_number, taxi_number):
 
     rider = sim.riders.get(rider_number)
     taxi = sim.taxis.get(taxi_number)
-
+    
     if rider_number == sim.taxis.get(taxi_number).passenger_id or sim.taxis.get(taxi_number).passenger_id == None:
         # pickup the rider
         rider.update_service_status('in_taxi')
@@ -352,6 +352,7 @@ def reallocate(sim: Simulation):
         # print(f'driver locs = {driver_locs}')
         # establish distance matrix 
         # print(f'the distance is {dist}')
+        rider_locs = utils.get_locations(All_riders)
         dist = cdist(driver_locs[:, :2], rider_locs[:, :2], metric="euclidean")
         ##
         cost = dist.copy()

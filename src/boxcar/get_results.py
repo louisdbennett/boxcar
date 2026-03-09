@@ -2,6 +2,7 @@ import csv
 import os
 from typing import Any, Dict
 from boxcar.classes.simulation import Simulation
+import numpy as np
 
 def save_results(
     sim: Simulation,
@@ -71,6 +72,22 @@ def save_results(
 
     highest_id, highest_norm = high_taxi.number, high_rate
 
+    hourly_profits_nonzero = []
+
+    for t in taxis:
+        if t.time_offline is None:
+            hrs = sim.simulation_length - t.time_online
+        elif t.time_offline:
+            hrs = t.time_offline - t.time_online
+
+        hourly_profit = (t.money_made - 0.2 * t.distance_covered) / hrs
+
+        if hourly_profit != 0:
+            hourly_profits_nonzero.append(hourly_profit)
+
+
+        std_hourly_profit_nonzero = np.std(hourly_profits_nonzero)
+
     row: Dict[str, Any] = {
         "run_name": run_name,
         "cfg": f"cr={cfg.get('rider_choice_rule')}, ms={cfg.get('matching_strategy')}, bl={cfg.get('batch_length', cfg.get('batch_length'))}",
@@ -85,6 +102,7 @@ def save_results(
         "Highest earning taxi per hour": highest_norm,
         "Lowest earning taxi id": lowest_id,
         "Lowest earning taxi per hour": lowest_norm,
+        'Standard deviation of hourly profit': std_hourly_profit_nonzero,
     }
 
     os.makedirs(os.path.dirname(csv_path) or ".", exist_ok=True)
