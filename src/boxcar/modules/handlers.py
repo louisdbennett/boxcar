@@ -40,6 +40,7 @@ def find_rider(sim: Simulation, taxi:Taxi):
         # update the rider to be in service so they don't go offline
         rider = riders[rider_number]
         rider.update_service_status(service_status='assigned')
+        
 
         # track the total distance the taxi has/will cover
         taxi.distance_covered += dist
@@ -179,7 +180,7 @@ def execute_rider_cancellation(sim: Simulation, rider_number):
     rider = sim.riders.get(rider_number)
 
     # if the rider has already had a service completion or is currently in service then no need to do anything
-    if not rider.at_destination and not rider.in_service:
+    if (not rider.at_destination) and (rider.in_service == "waiting"):
         if sim.verbose:
             print(f"{round(sim.current_time, 2)}: rider {rider_number} cancels and departs")
         rider.cancel_ride()
@@ -407,6 +408,7 @@ def reallocate(sim: Simulation):
             
             rider = All_riders.get(pair[1])
             rider.update_service_status(service_status='assigned')
+            rider.pickup_time = journey_time
             # set_new_start_and_end(self,current_time, dest_time, orig_loc, dest_loc,rider_no)                
             
             # print(sim.event_calendar)
