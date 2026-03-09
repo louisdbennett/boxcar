@@ -59,5 +59,5 @@ class Distributions:
 
     def generate_journey(self, dist) -> float:
         trip_time = dist / 20
-        journey_length = random.uniform(0.8 * trip_time, 1.2 * trip_time)
+        journey_length = random.uniform(0.7 * trip_time, 1.3 * trip_time)
         return journey_length
