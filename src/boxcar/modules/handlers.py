@@ -170,7 +170,7 @@ def execute_rider_arrival(sim: Simulation):
                 sim.change_batching_status(True)
                 sim.add_event(sim.current_time + sim.config["batch_length"], 'batch-end')
     else:
-        if sim.config["matching_strategy"]=='allow_rellocation':
+        if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation':
             reallocate(sim)
         else:
             find_taxi(sim, rider)
@@ -205,7 +205,8 @@ def execute_rider_pickup(sim: Simulation, rider_number, taxi_number):
         
         taxi.distance_covered += dist
         # separate metric for rerouting distance
-        if sim.config["matching_strategy"]=='allow_rellocation': 
+
+        if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation': 
             taxi.distance_covered += dist_taxi_to_rider
 
         # ignore below two
@@ -269,7 +270,8 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
                 sim.change_batching_status(True)
                 sim.add_event(sim.current_time + sim.config["batch_length"], 'batch-end')
         else:
-            if sim.config["matching_strategy"]=='allow_rellocation':
+
+            if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation':
                 reallocate(sim)
             else:
                 find_rider(sim, taxi)
@@ -427,7 +429,8 @@ def reallocate(sim: Simulation):
             moved_start = driver_locs[driver_locs[:, 2] == pair[0]][0, :2]
             
             taxi_start_to_here = ((moved_start[0]- rider.location[0])**2 +(moved_start[1]- rider.location[0])**2)**0.5
-            if sim.config["matching_strategy"]=='allow_rellocation': 
+
+            if sim.config["rider_choice_rule"] == 'closest' and sim.config["matching_strategy"]=='allow_rellocation': 
                 driver.distance_covered += taxi_start_to_here
             # ignore this one
             driver.distance_covered_reassign += taxi_start_to_here
