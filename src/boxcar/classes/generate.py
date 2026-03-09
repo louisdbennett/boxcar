@@ -53,7 +53,7 @@ class Distributions:
         arrival_time = random.expovariate(rate)  
         return arrival_time
 
-    def generate_rider_cancelling(self, rate=5) -> float:
+    def generate_rider_cancelling(self, rate=0.03480842) -> float:
         cancellation_time = random.expovariate(rate)
         return cancellation_time
 
