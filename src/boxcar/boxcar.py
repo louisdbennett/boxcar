@@ -10,13 +10,13 @@ from boxcar.test_hypothesis import test_all_configs
 CONFIGS = {
     "rider_choice_rule": ["closest", "shortest", "longest"],
     "matching_strategy": [None, 'allow_relocation', 'batching'],
-    'batch_length': [0.01, 0.05, 0.1, 0.2]
+    'batch_length': [0.01, 0.05, 0.075, 0.1, 0.2]
 }
 
 
 def boxcar():
     first = True
-    for trial in range(20):
+    for trial in range(200):
         for cr in CONFIGS['rider_choice_rule']:
             if cr == 'closest':
                 for ms in CONFIGS['matching_strategy']:
@@ -76,6 +76,7 @@ def boxcar():
         out_csv="outputs/hypothesis_tests_all_vs_baseline.csv",
         alpha=0.05
         )
+    get_histos()
 
 
 
