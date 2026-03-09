@@ -16,7 +16,7 @@ CONFIGS = {
 
 def boxcar():
     first = True
-    for trial in range(200):
+    for trial in range(20):
         for cr in CONFIGS['rider_choice_rule']:
             if cr == 'closest':
                 for ms in CONFIGS['matching_strategy']:

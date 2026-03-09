@@ -1,64 +1,71 @@
 config,metric,ks_stat,p_value,alpha,reject_null,conclusion,baseline_mean,test_mean,diff_percent
-"cr=closest, ms=allow_rellocation, bl=None",Total money_made,1.0,1.9426434495222354e-119,0.05,True,Different Distribution,13972.975795585131,29846.335250189826,113.60042189166322
-"cr=closest, ms=allow_rellocation, bl=None",Total distance driven,1.0,1.9426434495222354e-119,0.05,True,Different Distribution,7563.581449991341,117299.65851227943,1450.8480907865905
-"cr=closest, ms=allow_rellocation, bl=None",Average profit,0.98,2.0412129838866487e-110,0.05,True,Different Distribution,134.1849759550483,70.49775471799076,-47.462259305686075
-"cr=closest, ms=allow_rellocation, bl=None",Customers served,0.125,0.0878382826713132,0.05,False,Same Distribution,753.645,759.57,0.7861791692375149
-"cr=closest, ms=allow_rellocation, bl=None",Customers cancelled,0.0,1.0,0.05,False,Same Distribution,0.0,0.0,
-"cr=closest, ms=allow_rellocation, bl=None",Waiting time,1.0,1.9426434495222354e-119,0.05,True,Different Distribution,658.2529889437856,0.0,-100.0
-"cr=closest, ms=allow_rellocation, bl=None",Average free time,1.0,1.9426434495222354e-119,0.05,True,Different Distribution,0.9498730002506102,2.8407638414548693,199.0677533423284
-"cr=closest, ms=allow_rellocation, bl=None",Highest earning taxi per hour,0.92,2.9425834050810276e-91,0.05,True,Different Distribution,54.687254908089926,178.66815159944534,226.70894141555243
-"cr=closest, ms=allow_rellocation, bl=None",Lowest earning taxi per hour,0.085,0.46628639073563594,0.05,False,Same Distribution,1.8939102308311795,3.3751221906660875,78.20919575395341
-"cr=closest, ms=batching, bl=0.01",Total money_made,0.085,0.46628639073563594,0.05,False,Same Distribution,13972.975795585131,13935.558675815679,-0.2677820409684992
-"cr=closest, ms=batching, bl=0.01",Total distance driven,0.975,1.616640683238226e-108,0.05,True,Different Distribution,7563.581449991341,5821.389337907839,-23.033957174950455
-"cr=closest, ms=batching, bl=0.01",Average profit,0.13,0.06801920461119272,0.05,False,Same Distribution,134.1849759550483,138.76445739246037,3.412812354600862
-"cr=closest, ms=batching, bl=0.01",Customers served,0.075,0.6284308022715471,0.05,False,Same Distribution,753.645,752.105,-0.20434023976805574
-"cr=closest, ms=batching, bl=0.01",Customers cancelled,0.0,1.0,0.05,False,Same Distribution,0.0,0.0,
-"cr=closest, ms=batching, bl=0.01",Waiting time,0.23,4.7487878961137165e-05,0.05,True,Different Distribution,658.2529889437856,575.2393939956708,-12.611199089474113
-"cr=closest, ms=batching, bl=0.01",Average free time,0.945,1.776856400553018e-98,0.05,True,Different Distribution,0.9498730002506102,2.7236365981690507,186.73692140427812
-"cr=closest, ms=batching, bl=0.01",Highest earning taxi per hour,0.065,0.7933622419382523,0.05,False,Same Distribution,54.687254908089926,56.81433786126701,3.8895405460595285
-"cr=closest, ms=batching, bl=0.01",Lowest earning taxi per hour,0.05,0.9646522162314058,0.05,False,Same Distribution,1.8939102308311795,2.4359345256993716,28.619323452849937
-"cr=closest, ms=batching, bl=0.05",Total money_made,0.09,0.39352743357720954,0.05,False,Same Distribution,13972.975795585131,13920.516153301518,-0.37543643566739754
-"cr=closest, ms=batching, bl=0.05",Total distance driven,0.98,2.0412129838866487e-110,0.05,True,Different Distribution,7563.581449991341,5816.718076650757,-23.095717087076306
-"cr=closest, ms=batching, bl=0.05",Average profit,0.145,0.0297148244707607,0.05,True,Different Distribution,134.1849759550483,138.63260401229022,3.3145499528441063
-"cr=closest, ms=batching, bl=0.05",Customers served,0.1,0.2704743832803917,0.05,False,Same Distribution,753.645,750.21,-0.4557848854566733
-"cr=closest, ms=batching, bl=0.05",Customers cancelled,0.0,1.0,0.05,False,Same Distribution,0.0,0.0,
-"cr=closest, ms=batching, bl=0.05",Waiting time,0.105,0.220541217580421,0.05,False,Same Distribution,658.2529889437856,632.3958363395367,-3.9281481495038175
-"cr=closest, ms=batching, bl=0.05",Average free time,0.975,1.616640683238226e-108,0.05,True,Different Distribution,0.9498730002506102,2.731028349984133,187.51510457330517
-"cr=closest, ms=batching, bl=0.05",Highest earning taxi per hour,0.17,0.006094418258803505,0.05,True,Different Distribution,54.687254908089926,54.02114285745179,-1.218038922885477
-"cr=closest, ms=batching, bl=0.05",Lowest earning taxi per hour,0.08,0.5452713464323318,0.05,False,Same Distribution,1.8939102308311795,2.966571395926066,56.637381626273175
-"cr=closest, ms=batching, bl=0.1",Total money_made,0.165,0.008539483949831865,0.05,True,Different Distribution,13972.975795585131,13814.165023505033,-1.136556553188016
-"cr=closest, ms=batching, bl=0.1",Total distance driven,0.99,1.550229472718744e-114,0.05,True,Different Distribution,7563.581449991341,5769.497511752516,-23.720031972960097
-"cr=closest, ms=batching, bl=0.1",Average profit,0.135,0.052139087188847716,0.05,False,Same Distribution,134.1849759550483,137.37838555220947,2.3798562949632784
-"cr=closest, ms=batching, bl=0.1",Customers served,0.14,0.03956202584899502,0.05,True,Different Distribution,753.645,745.865,-1.032316276230848
-"cr=closest, ms=batching, bl=0.1",Customers cancelled,0.0,1.0,0.05,False,Same Distribution,0.0,0.0,
-"cr=closest, ms=batching, bl=0.1",Waiting time,0.1,0.2704743832803917,0.05,False,Same Distribution,658.2529889437856,676.9538837397032,2.840988967771277
-"cr=closest, ms=batching, bl=0.1",Average free time,0.995,7.770573798088942e-117,0.05,True,Different Distribution,0.9498730002506102,2.7311808387323513,187.53115816659374
-"cr=closest, ms=batching, bl=0.1",Highest earning taxi per hour,0.195,0.0009668691315127085,0.05,True,Different Distribution,54.687254908089926,58.74975521357152,7.428605279802815
-"cr=closest, ms=batching, bl=0.1",Lowest earning taxi per hour,0.095,0.32811544409418575,0.05,False,Same Distribution,1.8939102308311795,3.22664362517463,70.36940677798411
-"cr=closest, ms=batching, bl=0.2",Total money_made,0.2,0.000648608042418048,0.05,True,Different Distribution,13972.975795585131,13681.983358894617,-2.0825373273920333
-"cr=closest, ms=batching, bl=0.2",Total distance driven,0.985,2.0566377671402003e-112,0.05,True,Different Distribution,7563.581449991341,5711.0866794473095,-24.492296179955233
-"cr=closest, ms=batching, bl=0.2",Average profit,0.085,0.46628639073563594,0.05,False,Same Distribution,134.1849759550483,136.09561763610193,1.423886442915717
-"cr=closest, ms=batching, bl=0.2",Customers served,0.19,0.0014264303851701861,0.05,True,Different Distribution,753.645,740.33,-1.7667469431894247
-"cr=closest, ms=batching, bl=0.2",Customers cancelled,0.0,1.0,0.05,False,Same Distribution,0.0,0.0,
-"cr=closest, ms=batching, bl=0.2",Waiting time,0.275,4.6128382074998843e-07,0.05,True,Different Distribution,658.2529889437856,845.8585522837674,28.50052586027881
-"cr=closest, ms=batching, bl=0.2",Average free time,0.99,1.550229472718744e-114,0.05,True,Different Distribution,0.9498730002506102,2.7394412261282923,188.40078888499102
-"cr=closest, ms=batching, bl=0.2",Highest earning taxi per hour,0.205,0.0004306111484986726,0.05,True,Different Distribution,54.687254908089926,54.556295893752576,-0.23946898515466888
-"cr=closest, ms=batching, bl=0.2",Lowest earning taxi per hour,0.095,0.32811544409418575,0.05,False,Same Distribution,1.8939102308311795,3.2699021323195905,72.6534911258455
-"cr=shortest, ms=None, bl=None",Total money_made,0.62,2.882283188250992e-36,0.05,True,Different Distribution,13972.975795585131,12527.762727811178,-10.3429154169907
-"cr=shortest, ms=None, bl=None",Total distance driven,0.845,3.303840100995146e-73,0.05,True,Different Distribution,7563.581449991341,9618.270695263487,27.16555984565352
-"cr=shortest, ms=None, bl=None",Average profit,0.72,2.49265231315905e-50,0.05,True,Different Distribution,134.1849759550483,114.98454449206628,-14.308927900701878
-"cr=shortest, ms=None, bl=None",Customers served,0.52,4.894901209447945e-25,0.05,True,Different Distribution,753.645,704.215,-6.558790942685209
-"cr=shortest, ms=None, bl=None",Customers cancelled,0.0,1.0,0.05,False,Same Distribution,0.0,0.0,
-"cr=shortest, ms=None, bl=None",Waiting time,0.625,6.740108378679242e-37,0.05,True,Different Distribution,658.2529889437856,1115.4503370856503,69.45617503013104
-"cr=shortest, ms=None, bl=None",Average free time,0.64,7.809864998248257e-39,0.05,True,Different Distribution,0.9498730002506102,0.2819244916528526,-70.3197699504596
-"cr=shortest, ms=None, bl=None",Highest earning taxi per hour,0.31,6.865581733487208e-09,0.05,True,Different Distribution,54.687254908089926,46.69250396714136,-14.619038667025677
-"cr=shortest, ms=None, bl=None",Lowest earning taxi per hour,0.075,0.6284308022715471,0.05,False,Same Distribution,1.8939102308311795,2.8094838870500904,48.34303344024355
-"cr=longest, ms=None, bl=None",Total money_made,0.52,4.894901209447945e-25,0.05,True,Different Distribution,13972.975795585131,12921.855873566963,-7.522520166035622
-"cr=longest, ms=None, bl=None",Total distance driven,0.825,4.795451191824928e-69,0.05,True,Different Distribution,7563.581449991341,9685.275391853798,28.051445679412705
-"cr=longest, ms=None, bl=None",Average profit,0.65,3.677261662618134e-40,0.05,True,Different Distribution,134.1849759550483,118.29170618286014,-11.8442990052123
-"cr=longest, ms=None, bl=None",Customers served,0.66,1.6162390192594173e-41,0.05,True,Different Distribution,753.645,647.915,-14.029151656283798
-"cr=longest, ms=None, bl=None",Customers cancelled,0.0,1.0,0.05,False,Same Distribution,0.0,0.0,
-"cr=longest, ms=None, bl=None",Waiting time,0.77,1.1847742847593399e-58,0.05,True,Different Distribution,658.2529889437856,1503.170382838267,128.35754764292258
-"cr=longest, ms=None, bl=None",Average free time,0.625,6.740108378679242e-37,0.05,True,Different Distribution,0.9498730002506102,0.328391953707218,-65.42780417797152
-"cr=longest, ms=None, bl=None",Highest earning taxi per hour,0.33,4.869254633582969e-10,0.05,True,Different Distribution,54.687254908089926,47.63668465473207,-12.892529100623879
-"cr=longest, ms=None, bl=None",Lowest earning taxi per hour,0.085,0.46628639073563594,0.05,False,Same Distribution,1.8939102308311795,3.07745666131626,62.492213792290364
+"cr=closest, ms=allow_rellocation, bl=None",Total money_made,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,12110.26022022198,23754.81712504448,96.15447309198328
+"cr=closest, ms=allow_rellocation, bl=None",Total distance driven,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,5896.003813174228,48597.97643289146,724.2527985531916
+"cr=closest, ms=allow_rellocation, bl=None",Average profit,0.8,1.3259673752008224e-06,0.05,True,Different Distribution,114.95267632492133,151.56278683467525,31.847984475170488
+"cr=closest, ms=allow_rellocation, bl=None",Customers served,0.4,0.08105771161340149,0.05,False,Same Distribution,655.1,686.1,4.732101969165012
+"cr=closest, ms=allow_rellocation, bl=None",Customers cancelled,0.5,0.012298612583953778,0.05,True,Different Distribution,102.2,71.9,-29.647749510763205
+"cr=closest, ms=allow_rellocation, bl=None",Waiting time,0.5,0.012298612583953778,0.05,True,Different Distribution,174.6606434119912,154.4551575294378,-11.568425197479955
+"cr=closest, ms=allow_rellocation, bl=None",Average free time,0.85,1.4334782434603487e-07,0.05,True,Different Distribution,1.444404277145705,2.309656589732865,59.9037489903443
+"cr=closest, ms=allow_rellocation, bl=None",Highest earning taxi per hour,0.95,5.803555641539872e-10,0.05,True,Different Distribution,47.37280494954702,142.11064241343254,199.9835930441172
+"cr=closest, ms=allow_rellocation, bl=None",Lowest earning taxi per hour,0.25,0.571336004933722,0.05,False,Same Distribution,8.74325735572361,10.784789191009237,23.349785465815845
+"cr=closest, ms=allow_rellocation, bl=None",Standard deviation of hourly profit,0.95,5.803555641539872e-10,0.05,True,Different Distribution,4.905367299750554,17.52654242968817,257.2931721255495
+"cr=closest, ms=batching, bl=0.01",Total money_made,0.4,0.08105771161340149,0.05,False,Same Distribution,12110.26022022198,11585.85489291266,-4.33025647486631
+"cr=closest, ms=batching, bl=0.01",Total distance driven,0.9,1.1316933501002751e-08,0.05,True,Different Distribution,5896.003813174228,4835.55244645633,-17.985934207647393
+"cr=closest, ms=batching, bl=0.01",Average profit,0.25,0.571336004933722,0.05,False,Same Distribution,114.95267632492133,117.53036273832049,2.2423892125079044
+"cr=closest, ms=batching, bl=0.01",Customers served,0.45,0.0335416594061465,0.05,True,Different Distribution,655.1,627.65,-4.190199969470316
+"cr=closest, ms=batching, bl=0.01",Customers cancelled,0.4,0.08105771161340149,0.05,False,Same Distribution,102.2,127.7,24.951076320939332
+"cr=closest, ms=batching, bl=0.01",Waiting time,0.3,0.33559098126008213,0.05,False,Same Distribution,174.6606434119912,166.8056526917767,-4.4972871774473475
+"cr=closest, ms=batching, bl=0.01",Average free time,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,1.444404277145705,3.180736711497139,120.21097291283363
+"cr=closest, ms=batching, bl=0.01",Highest earning taxi per hour,0.2,0.8319696107963263,0.05,False,Same Distribution,47.37280494954702,47.111582551621446,-0.5514184735393624
+"cr=closest, ms=batching, bl=0.01",Lowest earning taxi per hour,0.15,0.9831368772656193,0.05,False,Same Distribution,8.74325735572361,9.218805258817506,5.439024424719545
+"cr=closest, ms=batching, bl=0.01",Standard deviation of hourly profit,0.2,0.8319696107963263,0.05,False,Same Distribution,4.905367299750554,5.06182459994863,3.189512438875513
+"cr=closest, ms=batching, bl=0.05",Total money_made,0.8,1.3259673752008224e-06,0.05,True,Different Distribution,12110.26022022198,10580.810655727239,-12.629369944840931
+"cr=closest, ms=batching, bl=0.05",Total distance driven,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,5896.003813174228,4418.98032786362,-25.051264078396574
+"cr=closest, ms=batching, bl=0.05",Average profit,0.8,1.3259673752008224e-06,0.05,True,Different Distribution,114.95267632492133,102.65037677395094,-10.702055788764001
+"cr=closest, ms=batching, bl=0.05",Customers served,0.8,1.3259673752008224e-06,0.05,True,Different Distribution,655.1,569.85,-13.013280415203784
+"cr=closest, ms=batching, bl=0.05",Customers cancelled,0.8,1.3259673752008224e-06,0.05,True,Different Distribution,102.2,175.95,72.16242661448139
+"cr=closest, ms=batching, bl=0.05",Waiting time,0.75,9.54696510144592e-06,0.05,True,Different Distribution,174.6606434119912,142.98999676306534,-18.132674900447288
+"cr=closest, ms=batching, bl=0.05",Average free time,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,1.444404277145705,3.453593710405704,139.10159815023317
+"cr=closest, ms=batching, bl=0.05",Highest earning taxi per hour,0.2,0.8319696107963263,0.05,False,Same Distribution,47.37280494954702,44.70760150396946,-5.626019925178709
+"cr=closest, ms=batching, bl=0.05",Lowest earning taxi per hour,0.65,0.0002704973445409677,0.05,True,Different Distribution,8.74325735572361,4.788613102389013,-45.23078862302691
+"cr=closest, ms=batching, bl=0.05",Standard deviation of hourly profit,0.6,0.001115801546231492,0.05,True,Different Distribution,4.905367299750554,5.620208002837781,14.5726234021982
+"cr=closest, ms=batching, bl=0.1",Total money_made,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,12110.26022022198,9612.593459992753,-20.624385560754245
+"cr=closest, ms=batching, bl=0.1",Total distance driven,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,5896.003813174228,4014.446729996377,-31.912412929137467
+"cr=closest, ms=batching, bl=0.1",Average profit,0.9,1.1316933501002751e-08,0.05,True,Different Distribution,114.95267632492133,95.13475128723826,-17.240072759738446
+"cr=closest, ms=batching, bl=0.1",Customers served,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,655.1,517.75,-20.966264692413375
+"cr=closest, ms=batching, bl=0.1",Customers cancelled,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,102.2,247.55,142.22113502935423
+"cr=closest, ms=batching, bl=0.1",Waiting time,0.95,5.803555641539872e-10,0.05,True,Different Distribution,174.6606434119912,135.09748555537044,-22.651444013806135
+"cr=closest, ms=batching, bl=0.1",Average free time,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,1.444404277145705,3.6257950444260594,151.0235604945045
+"cr=closest, ms=batching, bl=0.1",Highest earning taxi per hour,0.25,0.571336004933722,0.05,False,Same Distribution,47.37280494954702,43.415187269066095,-8.354197486713872
+"cr=closest, ms=batching, bl=0.1",Lowest earning taxi per hour,0.6,0.001115801546231492,0.05,True,Different Distribution,8.74325735572361,4.559907401439693,-47.84658376257637
+"cr=closest, ms=batching, bl=0.1",Standard deviation of hourly profit,0.6,0.001115801546231492,0.05,True,Different Distribution,4.905367299750554,5.757199611537846,17.36531149931645
+"cr=closest, ms=batching, bl=0.2",Total money_made,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,12110.26022022198,7960.282372474275,-34.26827972546767
+"cr=closest, ms=batching, bl=0.2",Total distance driven,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,5896.003813174228,3328.9911862371364,-43.53817786211862
+"cr=closest, ms=batching, bl=0.2",Average profit,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,114.95267632492133,79.99999671640327,-30.40614688232399
+"cr=closest, ms=batching, bl=0.2",Customers served,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,655.1,427.05,-34.81147916348649
+"cr=closest, ms=batching, bl=0.2",Customers cancelled,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,102.2,340.0,232.68101761252447
+"cr=closest, ms=batching, bl=0.2",Waiting time,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,174.6606434119912,114.85845721788446,-34.23907356910668
+"cr=closest, ms=batching, bl=0.2",Average free time,1.0,1.4508889103849681e-11,0.05,True,Different Distribution,1.444404277145705,3.9548899197442005,173.80768544658974
+"cr=closest, ms=batching, bl=0.2",Highest earning taxi per hour,0.45,0.0335416594061465,0.05,True,Different Distribution,47.37280494954702,38.492333508816685,-18.74592701485211
+"cr=closest, ms=batching, bl=0.2",Lowest earning taxi per hour,0.8,1.3259673752008224e-06,0.05,True,Different Distribution,8.74325735572361,3.0783562431692815,-64.79165466684917
+"cr=closest, ms=batching, bl=0.2",Standard deviation of hourly profit,0.55,0.00396729438660086,0.05,True,Different Distribution,4.905367299750554,5.619722980094171,14.562735809404986
+"cr=shortest, ms=None, bl=None",Total money_made,0.4,0.08105771161340149,0.05,False,Same Distribution,12110.26022022198,11768.62673350482,-2.8210251514388904
+"cr=shortest, ms=None, bl=None",Total distance driven,0.3,0.33559098126008213,0.05,False,Same Distribution,5896.003813174228,5988.687536860152,1.5719753009458548
+"cr=shortest, ms=None, bl=None",Average profit,0.3,0.33559098126008213,0.05,False,Same Distribution,114.95267632492133,111.14415938018874,-3.313117246585511
+"cr=shortest, ms=None, bl=None",Customers served,0.2,0.8319696107963263,0.05,False,Same Distribution,655.1,648.55,-0.9998473515493921
+"cr=shortest, ms=None, bl=None",Customers cancelled,0.3,0.33559098126008213,0.05,False,Same Distribution,102.2,113.9,11.448140900195696
+"cr=shortest, ms=None, bl=None",Waiting time,0.35,0.17453300569806826,0.05,False,Same Distribution,174.6606434119912,182.9620842372221,4.752897197137518
+"cr=shortest, ms=None, bl=None",Average free time,0.25,0.571336004933722,0.05,False,Same Distribution,1.444404277145705,1.4881612095077363,3.0294103288380985
+"cr=shortest, ms=None, bl=None",Highest earning taxi per hour,0.25,0.571336004933722,0.05,False,Same Distribution,47.37280494954702,43.53748250877747,-8.096042539288606
+"cr=shortest, ms=None, bl=None",Lowest earning taxi per hour,0.25,0.571336004933722,0.05,False,Same Distribution,8.74325735572361,7.472995833845514,-14.528469999187932
+"cr=shortest, ms=None, bl=None",Standard deviation of hourly profit,0.3,0.33559098126008213,0.05,False,Same Distribution,4.905367299750554,8.2000978148594,67.16582701720193
+"cr=longest, ms=None, bl=None",Total money_made,0.45,0.0335416594061465,0.05,True,Different Distribution,12110.26022022198,11516.861651502175,-4.899965466711735
+"cr=longest, ms=None, bl=None",Total distance driven,0.4,0.08105771161340149,0.05,False,Same Distribution,5896.003813174228,6181.653597735288,4.844803253396729
+"cr=longest, ms=None, bl=None",Average profit,0.35,0.17453300569806826,0.05,False,Same Distribution,114.95267632492133,111.27115070777127,-3.202644544563697
+"cr=longest, ms=None, bl=None",Customers served,0.6,0.001115801546231492,0.05,True,Different Distribution,655.1,600.85,-8.281178446038773
+"cr=longest, ms=None, bl=None",Customers cancelled,0.5,0.012298612583953778,0.05,True,Different Distribution,102.2,145.95,42.808219178082176
+"cr=longest, ms=None, bl=None",Waiting time,0.45,0.0335416594061465,0.05,True,Different Distribution,174.6606434119912,186.30281028614817,6.665592572389256
+"cr=longest, ms=None, bl=None",Average free time,0.25,0.571336004933722,0.05,False,Same Distribution,1.444404277145705,1.3335505934514615,-7.674699213249498
+"cr=longest, ms=None, bl=None",Highest earning taxi per hour,0.15,0.9831368772656193,0.05,False,Same Distribution,47.37280494954702,53.10590725422003,12.10209594044279
+"cr=longest, ms=None, bl=None",Lowest earning taxi per hour,0.2,0.8319696107963263,0.05,False,Same Distribution,8.74325735572361,8.8088992488154,0.7507715994293465
+"cr=longest, ms=None, bl=None",Standard deviation of hourly profit,0.2,0.8319696107963263,0.05,False,Same Distribution,4.905367299750554,5.744031238586607,17.09686324362908

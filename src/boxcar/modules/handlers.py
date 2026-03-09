@@ -355,18 +355,17 @@ def reallocate(sim: Simulation):
         rider_locs = utils.get_locations(All_riders)
         dist = cdist(driver_locs[:, :2], rider_locs[:, :2], metric="euclidean")
         ##
-        rows = len(driver_locs)
-        cols = len(rider_locs)
+        cost = dist.copy()
 
-        diff = abs(rows - cols)
+        # convert existing assignments to indices
+        #x, y = driver_locs[driver_locs[:, 2] == target_num][0, :2]
 
         if len(Existing_pairs) != 0:
             # print(f'Existing pairings = {Existing_pairs}') 
 
             d_arr = np.array(driver_locs)
             r_arr = np.array(rider_locs)
-                       
-            # creating an index for the existing paried drivers and riders
+            
             pair_ids = {p[0] for p in Existing_pairs}
             paired_driver_idx = [i for i, (_, _, id_) in enumerate(driver_locs) if id_ in pair_ids]
 
@@ -374,97 +373,25 @@ def reallocate(sim: Simulation):
             paired_rider_idx = [i for i, (_, _, id_) in enumerate(rider_locs) if id_ in pair_ids]
 
             existing_idx = list(zip(paired_driver_idx, paired_rider_idx))
-
-            
-        if rows > cols:
-            # More drivers than riders: Add dummy columns
-            padding = np.zeros((rows, diff))
-            extended_matrix = np.hstack((dist, padding))
-            if len(Existing_pairs) != 0:
-                for d_i, r_i in existing_idx:
-                    extended_matrix[d_i,-1] = np.inf
-                
-        elif cols > rows:
-            # More riders than drivers: Add dummy rows
-            padding = np.zeros((diff, cols))
-            extended_matrix = np.vstack((dist, padding))
-            if len(Existing_pairs) != 0:
-                for d_i, r_i in existing_idx:
-                    extended_matrix[-1,r_i] = np.inf
-            
-        else:
-            # Already square
-            extended_matrix = dist.copy()
-        
-        cost = extended_matrix.copy()
-
-        if len(Existing_pairs) != 0:
-            # print(f'Existing pairings = {Existing_pairs}') 
-
-            # d_arr = np.array(driver_locs)
-            # r_arr = np.array(rider_locs)
-                       
-            # # creating an index for the existing paried drivers and riders
-            # pair_ids = {p[0] for p in Existing_pairs}
-            # paired_driver_idx = [i for i, (_, _, id_) in enumerate(driver_locs) if id_ in pair_ids]
-
-            # pair_ids = {p[1] for p in Existing_pairs}
-            # paired_rider_idx = [i for i, (_, _, id_) in enumerate(rider_locs) if id_ in pair_ids]
-
-            # existing_idx = list(zip(paired_driver_idx, paired_rider_idx))
-
-
             # print(f'the existing index {existing_idx}')
 
-            # for d_i, r_i in existing_idx:
-            #     current_cost = dist[d_i, r_i]
-            #     # driver constraint (row)
-            #     worse_for_driver = dist[d_i, :] >= current_cost
-            #     cost[d_i, worse_for_driver] = np.inf
-
-            #     # rider constraint (column)
-            #     worse_for_rider = dist[:, r_i] >= current_cost
-            #     cost[worse_for_rider, r_i] = np.inf
-
-            #     # keep original assignment feasible
-            #     cost[d_i, r_i] = current_cost
             for d_i, r_i in existing_idx:
-
-                current_cost = extended_matrix[d_i, r_i]
-
+                current_cost = dist[d_i, r_i]
                 # driver constraint (row)
-                worse_for_driver = extended_matrix[d_i, :] > current_cost
+                worse_for_driver = dist[d_i, :] >= current_cost
                 cost[d_i, worse_for_driver] = np.inf
-                cost[d_i, r_i] = current_cost
 
                 # rider constraint (column)
-                worse_for_rider = extended_matrix[:, r_i] > current_cost
+                worse_for_rider = dist[:, r_i] >= current_cost
                 cost[worse_for_rider, r_i] = np.inf
 
                 # keep original assignment feasible
                 cost[d_i, r_i] = current_cost
 
-            for d_i, r_i in existing_idx:
-                current_cost = extended_matrix[d_i, r_i]
-                driver_options = np.sum(cost[d_i,:] != np.inf)
-                
-                if driver_options == 1:
-                    cost[:,r_i] = np.inf
-                    cost[d_i,r_i] = current_cost
-                
-                rider_options = np.sum(cost[:,r_i] != np.inf)
-                if rider_options == 1:
-                    cost[d_i,:] = np.inf
-                    cost[d_i,r_i] = current_cost
+            # print(f'dist matrix ={dist}')
+            # print(f'cost matrix = {cost}')
 
-        row_ind_dum, col_ind_dum = linear_sum_assignment(cost)
-        assignements = range(len(row_ind_dum))
-        row_ind = []
-        col_ind = []
-        for i in assignements:
-            if row_ind_dum[i] < rows and col_ind_dum[i] < cols:
-                row_ind.append(row_ind_dum[i])
-                col_ind.append(col_ind_dum[i])
+        row_ind, col_ind = linear_sum_assignment(cost)
         assigned_pairs = [(driver_locs[r,2], rider_locs[c,2], dist[r,c]) for r,c in zip(row_ind,col_ind)] 
         
         # if len(Existing_pairs) != 0:
