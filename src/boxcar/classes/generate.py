@@ -4,19 +4,25 @@ from numpy.random import multivariate_normal
 from numpy import all
 
 class Distributions:
+    """Random generators used by the simulation."""
+
     def __init__(self, simulation):
+        """Store reference to the simulation."""
         self.simulation = simulation
 
     def generate_taxi_arrival(self, alpha=7718, beta=1/1994.886) -> float:
+        """Generate time until the next taxi arrival."""
         rate = random.gammavariate(alpha, beta)
         arrival_time = random.expovariate(rate)  
         return arrival_time
 
     def generate_taxi_departure(self, lower=5, upper=8) -> float:
+        """Generate how long a taxi stays online before departure."""
         departure_time = random.uniform(lower, upper)
         return departure_time
 
     def generate_location(self) -> Tuple[float, float]:
+        """Generate a uniform random location in the city."""
         x = random.uniform(0, self.simulation.boundary_length)
         y = random.uniform(0, self.simulation.boundary_length)
         return (x, y)
@@ -26,6 +32,7 @@ class Distributions:
         mu=[9.973919, 11.513314],
         Sigma=[[20.372409, -1.315436], [-1.315436, 20.123543]],
     ) -> Tuple[float, float]:
+        """Generate a taxi starting location within the city bounds."""
         # have to do rejection sampling to make sure people are coming online within the city
         while True:
             samp = multivariate_normal(mu, Sigma, 1)[0]
@@ -42,6 +49,7 @@ class Distributions:
             [-7.9774297, 3.0090637, -0.2035568, 24.7523207],
         ],
     ) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+        """Generate rider origin and destination within the city bounds."""
         while True:
             samp = multivariate_normal(mu, Sigma, 1)[0]
             if all((samp >= 0) & (samp <= self.simulation.boundary_length)):
@@ -49,15 +57,18 @@ class Distributions:
 
     # possibly a way to combine generate_taxi_arrival and generate_rider_arrival
     def generate_rider_arrival(self, alpha=64420, beta=1/1994.91) -> float:
+        """Generate time until the next rider arrival."""
         rate = random.gammavariate(alpha, beta)
         arrival_time = random.expovariate(rate)  
         return arrival_time
 
     def generate_rider_cancelling(self, rate=0.03480842) -> float:
+        """Generate time until a waiting rider cancels."""
         cancellation_time = random.expovariate(rate)
         return cancellation_time
 
     def generate_journey(self, dist) -> float:
+        """Generate travel time for a journey of a given distance."""
         trip_time = dist / 20
         journey_length = random.uniform(0.7 * trip_time, 1.3 * trip_time)
         return journey_length

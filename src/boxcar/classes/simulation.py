@@ -4,6 +4,8 @@ from boxcar.classes.taxi import Taxi
 from boxcar.classes.rider import Rider
 
 class Simulation:
+    """Discrete-event simulation for the BoxCar model."""
+
     def __init__(
         self, 
         config: Dict[str, Any],
@@ -12,6 +14,7 @@ class Simulation:
         simulation_length: int = 24,
         verbose: bool= True
     ):
+        """Initialise simulation state, handlers, distributions, and first events."""
         # fixed values
         self.boundary_length = 20
         self.simulation_length = simulation_length
@@ -60,6 +63,7 @@ class Simulation:
     def add_event(
         self, event_time: float, event_type: str, event_data: Any = None
     ) -> None:
+        """Insert an event into the calendar in time order."""
         event = {'time': event_time, 'type': event_type, 'data': event_data}
         index = bisect_right([e['time'] for e in self.event_calendar], event_time)
         self.event_calendar.insert(index, event)
@@ -67,15 +71,17 @@ class Simulation:
     def register_distribution(
         self, random_quantity: str, handler: Callable[[Any], None]
     ) -> None:
+        """Register a random generator function."""
         self.distributions[random_quantity] = handler
 
     def register_event_handler(
         self, event_type: str, handler: Callable[[Any], None]
     ) -> None:
-        # This function allows us to dynamically add event types to the list.
+        """Register the handler for an event type."""
         self.event_handlers[event_type] = handler
 
     def progress_time(self) -> None:
+        """Process the next event in the calendar."""
         if not self.event_calendar:
             print("No more events to process.")
             return
@@ -85,7 +91,7 @@ class Simulation:
         event_type = next_event["type"]
         event_data = next_event["data"]
 
-        # perform any necessary tracking of variables here
+        # perform any necessary tracking of variables here
 
         if event_type in self.event_handlers:
             self.event_handlers[event_type](event_data)
@@ -93,6 +99,7 @@ class Simulation:
             raise Exception(f"No handler registered for event type: {event_type}")
 
     def run(self) -> None:
+        """Run the simulation until the termination event is reached."""
         terminate_simulation = 0
 
         while self.event_calendar:
@@ -107,18 +114,22 @@ class Simulation:
         if terminate_simulation == 0:
             raise Exception('No events left to process')
 
-    # some helper functions
     def get_idle_taxis(self) -> Dict[int, Taxi]:
+        """Return all taxis that are idle and online."""
         return {num: taxi for num, taxi in self.taxis.items() if taxi.idle and taxi.online}
 
-    def get_waiting_riders(self, status = 'waiting') -> Dict[int, Rider]:
+    def get_waiting_riders(self, status='waiting') -> Dict[int, Rider]:
+        """Return riders with the given service status who are still active."""
         return {num: rider for num, rider in self.riders.items() if (rider.in_service in status and not rider.cancelled and not rider.at_destination)}
 
-    def change_batching_status(self, status:bool) -> None:
+    def change_batching_status(self, status: bool) -> None:
+        """Update whether batching is currently active."""
         self.batching = status
 
     def get_enroute_taxis(self) -> Dict[int, Taxi]:
+        """Return all taxis currently en route and online."""
         return {num: taxi for num, taxi in self.taxis.items() if taxi.en_route and taxi.online}
     
     def get_enroute_or_idle_taxis(self) -> Dict[int, Taxi]:
+        """Return all online taxis that are either en route or idle."""
         return {num: taxi for num, taxi in self.taxis.items() if (taxi.en_route or taxi.idle) and taxi.online}

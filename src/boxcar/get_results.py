@@ -11,6 +11,7 @@ def save_results(
     run_name: str = None,
     rewrite: bool = True,
 ) -> None:
+    """Compute summary metrics for one run and save them to CSV."""
     taxis = list(sim.taxis.values())
     riders = list(sim.riders.values())
 
@@ -23,9 +24,12 @@ def save_results(
     served = sum(1 for r in riders if getattr(r, "at_destination", False))
     cancelled = sum(1 for r in riders if getattr(r, "cancelled", False))
 
+    # Total waiting time over riders who were picked up
     online_time = (rider.online_time for rider in sim.riders.values() if rider.pickup_time)
     pickup_time = (rider.pickup_time for rider in sim.riders.values() if rider.pickup_time)
     waiting_total = sum(pickup - online for online, pickup in zip(online_time, pickup_time))
+
+    # Revenue per hour for each taxi
     per_hour = []
     for t in taxis:
         if t.time_offline is None:
@@ -34,9 +38,9 @@ def save_results(
             hrs = t.time_offline - t.time_online
         per_hour.append((t, t.money_made / hrs))
 
-
     end_time = sim.simulation_length  # hours
 
+    # Compute idle time as online time minus recorded busy path time
     free_times = []
     for t in taxis:
         t_off = getattr(t, "time_offline")
@@ -48,7 +52,6 @@ def save_results(
             t_end = end_time
 
         online = t_end - t_on
-
 
         busy = sum(
             (seg["t_end"] - seg["t_start"])
@@ -85,7 +88,6 @@ def save_results(
         if hourly_profit != 0:
             hourly_profits_nonzero.append(hourly_profit)
 
-
         std_hourly_profit_nonzero = np.std(hourly_profits_nonzero)
 
     row: Dict[str, Any] = {
@@ -117,9 +119,5 @@ def save_results(
             writer.writeheader()
 
         writer.writerow(row)
+
     return row
-    '''with open(csv_path, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(row)'''

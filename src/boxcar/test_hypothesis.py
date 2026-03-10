@@ -11,8 +11,10 @@ def test_all_configs(
     alpha: float = 0.05,
     bins: int = 4,
 ):
+    """Compare each configuration against the baseline using KS tests."""
     df = pd.read_csv(csv_path)
 
+    # Exclude identifiers from the set of tested metrics
     skip = {"run_name", "cfg", "Highest earning taxi id", "Lowest earning taxi id"}
     metrics = [c for c in df.columns if c not in skip]
 
@@ -27,8 +29,9 @@ def test_all_configs(
         for m in metrics:
             x = base[m].dropna().to_numpy(dtype=float)
             y = test[m].dropna().to_numpy(dtype=float)
-            ks_stat, ks_p = stats.ks_2samp(x, y)
 
+            # Kolmogorov-Smirnov test for equality of distributions
+            ks_stat, ks_p = stats.ks_2samp(x, y)
             reject_null = ks_p < alpha
             
             rows.append({

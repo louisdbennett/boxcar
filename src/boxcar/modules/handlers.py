@@ -7,6 +7,7 @@ from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
 
 def find_rider(sim: Simulation, taxi: Taxi):
+    """Assign a rider to a given taxi based on the active rider choice rule."""
     location = taxi.location
     taxi_number = taxi.number
 
@@ -66,6 +67,7 @@ def find_rider(sim: Simulation, taxi: Taxi):
 
 
 def find_taxi(sim: Simulation, rider: Rider):
+    """Assign the closest idle taxi to a given rider."""
     location = rider.location
     rider_number = rider.number
 
@@ -108,6 +110,7 @@ def find_taxi(sim: Simulation, rider: Rider):
 
 
 def execute_taxi_arrival(sim: Simulation):
+    """Handle the arrival of a new taxi into the simulation."""
     # get the taxi id we'll use to track it through the system
     sim.number_taxis += 1
 
@@ -147,6 +150,7 @@ def execute_taxi_arrival(sim: Simulation):
 
 
 def execute_taxi_departure(sim: Simulation, taxi_number):
+    """Handle a taxi departure event."""
     if sim.verbose:
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} departs")
 
@@ -161,6 +165,7 @@ def execute_taxi_departure(sim: Simulation, taxi_number):
 
 
 def execute_rider_arrival(sim: Simulation):
+    """Handle the arrival of a new rider into the simulation."""
     # get the rider id we'll use to track it through the system
     sim.number_riders += 1
 
@@ -203,6 +208,7 @@ def execute_rider_arrival(sim: Simulation):
 
 
 def execute_rider_cancellation(sim: Simulation, rider_number):
+    """Handle rider cancellation if the rider is still waiting."""
     rider = sim.riders.get(rider_number)
 
     # if the rider has already had a service completion or is currently in service then no need to do anything
@@ -213,6 +219,7 @@ def execute_rider_cancellation(sim: Simulation, rider_number):
 
 
 def execute_rider_pickup(sim: Simulation, rider_number, taxi_number):
+    """Handle the pickup of a rider by a taxi."""
     if sim.verbose:
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} picking up rider {rider_number}")
 
@@ -280,6 +287,7 @@ def execute_rider_pickup(sim: Simulation, rider_number, taxi_number):
 
 
 def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
+    """Handle the completion of a rider trip and update taxi state."""
     if sim.verbose:
         print(f"{round(sim.current_time, 2)}: taxi {taxi_number} dropping off rider {rider_number}")
 
@@ -323,6 +331,7 @@ def execute_rider_dropoff(sim: Simulation, rider_number, taxi_number):
 
 
 def execute_batch_end(sim: Simulation):
+    """Perform batched matching at the end of a batching interval."""
     ### finds available riders n drivers
     riders = sim.get_waiting_riders()
     taxis = sim.get_idle_taxis()
@@ -386,6 +395,7 @@ def execute_batch_end(sim: Simulation):
 
 
 def reallocate(sim: Simulation):
+    """Reassign idle and en-route taxis to riders under relocation matching."""
     All_riders = sim.get_waiting_riders(["waiting", "assigned"])
     All_drivers = sim.get_enroute_or_idle_taxis()
 
@@ -488,5 +498,6 @@ def reallocate(sim: Simulation):
 
 
 def execute_termination(sim: Simulation):
+    """Handle the simulation termination event."""
     if sim.verbose:
         print(f"{round(sim.current_time, 2)}: terminating simulation")

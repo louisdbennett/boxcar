@@ -7,6 +7,7 @@ from plotnine import ggplot, aes, geom_histogram, geom_density, labs,theme_minim
 
 
 def plot_taxi_path(taxi, outdir="outputs/figures", filename=None):
+    """Plot the full path of a taxi, distinguishing empty and occupied segments."""
     path = taxi.path 
 
     segs = np.array([[s["start"], s["end"]] for s in path], dtype=float)
@@ -19,6 +20,7 @@ def plot_taxi_path(taxi, outdir="outputs/figures", filename=None):
 
     fig, ax = plt.subplots(figsize=(7, 6))
 
+    # Empty and occupied segments are coloured differently
     lc = LineCollection(segs, colors=np.where(occ, "C1", "C0"), linewidths=2, alpha=0.95)
     ax.add_collection(lc)
 
@@ -47,6 +49,7 @@ def get_histos(
     bins: int = 20,
     dpi: int = 200,
 ):
+    """Create a histogram and density plot for each metric within each configuration."""
     df = pd.read_csv(csv_path)
 
     skip = {"run_name", "cfg"}
@@ -64,6 +67,7 @@ def get_histos(
         mask = df["cfg"] == cfg_val
         sub = df.loc[mask]
 
+        # Clean config string so it can be used in filenames
         cfg_tag = str(cfg_val).replace(" ", "").replace("{", "").replace("}", "").replace("'", "")
         cfg_tag = cfg_tag.replace(":", "_").replace(",", "__")
         if len(cfg_tag) > 120:
